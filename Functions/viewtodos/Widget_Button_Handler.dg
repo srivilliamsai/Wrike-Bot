@@ -1,0 +1,186 @@
+
+id = target.get("id");
+info id;
+splitIndex = id.indexOf("|");
+splitLastIndex = id.lastIndexOf("|");
+current_todo_url = id.substring(0,splitIndex);
+info current_todo_url;
+todos_url = id.substring(splitIndex + 1,splitLastIndex);
+info todos_url;
+page_no = id.substring(splitLastIndex + 1,id.length()).toNumber();
+info page_no;
+i = 0;
+dividerElement = {"type":"divider"};
+button = List();
+button.add({"label":"Edit Default Project","emotion":"positive","type":"invoke.function","name":"configureprojectform","id":id});
+file_image_url = "https://i.imgur.com/2VA4szx.png";
+todos = invokeurl
+[
+	url :todos_url + "?page=" + page_no
+	type :GET
+	connection:"wrike"
+];
+info todos;
+if(todos.size() == 0)
+{
+	sections = List();
+	elements = List();
+	elements.add({"type":"activity","title":"You don't have any more To-dos🤔","description":"Use `/wrike Create a To-do` in any Cliq chat or use the message action (select a message, click more, and then click `Create a To-do`) to create your first task and start organizing your day! 📅💪","image_url":"https://i.imgur.com/ZSIOsEj.png"});
+	elements.add(dividerElement);
+	sections.add({"id":1,"elements":elements});
+	header = {"title":"page " + page_no,"navigation":"continue","buttons":button};
+	return {"type":"applet","header":header,"sections":sections,"active_tab":"To-dos"};
+	//return {"type":"applet","data_type":"info","info":{"title":" You don’t have any todos yet.","description":"Click here to Create.","image_url":"https://i.imgur.com/ZSIOsEj.png"},"active_tab":"To-dos"};
+}
+current_todo = todos.get(0);
+sections = List();
+elements = List();
+i = 0;
+if(current_todo_url != "next_page")
+{
+	current_todo = invokeurl
+	[
+		url :current_todo_url
+		type :GET
+		connection:"wrike"
+	];
+	todo_title = current_todo.get("title");
+	if(todo_title.length() >= 50)
+	{
+		todo_title = todo_title.subString(0,47) + "..";
+	}
+	creator_name = current_todo.get("creator").get("name");
+	if(creator_name.length() >= 20)
+	{
+		creator_name = creator_name.subString(0,18) + "..";
+	}
+	description = "";
+	if(current_todo.get("description") != null)
+	{
+		description = current_todo.get("description");
+	}
+	description = description.replaceAll("&lt;","<").replaceAll("&gt;",">").replaceAll("&amp;","&");
+	description = description.replaceAll("<br>","\n");
+	description = description.replaceAll("<[^>]*>","");
+	description = description.trim();
+	if(description.length() >= 200)
+	{
+		description = description.subString(0,198) + "..";
+	}
+	starts_on = current_todo.get("starts_on");
+	if(starts_on == null)
+	{
+		starts_on = "-";
+	}
+	starts_on = starts_on.replaceAll("T"," ").subString(0,starts_on.lastIndexOf(":"));
+	due_on = current_todo.get("due_on");
+	if(due_on == null)
+	{
+		due_on = "-";
+	}
+	due_on = due_on.replaceAll("T"," ").subString(0,due_on.lastIndexOf(":"));
+	created_at = current_todo.get("created_at");
+	if(created_at == null)
+	{
+		created_at = "-";
+	}
+	created_at = created_at.replaceAll("T"," ").subString(0,created_at.lastIndexOf(":"));
+	completed_emoji = "✖️";
+	if(current_todo.get("completed") == true)
+	{
+		completed_emoji = "✔️";
+	}
+	elements.add({"type":"title","text":todo_title});
+	elements.add({"type":"text","text":description});
+	elements.add({"type":"buttons","buttons":{{"label":"View Comments","emotion":"negative","type":"invoke.function","name":"viewcomments","id":"To-dos" + "|" + current_todo.get("comments_url") + "|1"},{"label":"View","emotion":"positive","type":"open.url","url":current_todo.get("app_url")}}});
+	elements.add(dividerElement);
+	assignees_name = "";
+	assignees = current_todo.get("assignees");
+	info assignees;
+	for each  assignee in assignees
+	{
+		assignees_name = assignees_name + " " + assignee.get("name") + ",";
+	}
+	if(assignees_name.length() >= 1)
+	{
+		assignees_name = assignees_name.substring(0,assignees_name.length() - 1);
+	}
+	elements.add({"type":"fields","data":{{"Completed":completed_emoji},{"Starts on":starts_on},{"Due on":due_on},{"Assignees":assignees_name}},"style":{"short":false}});
+	view_people_button = {"label":creator_name,"type":"invoke.function","name":"viewpeople","id":"To-dos" + "|" + current_todo.get("creator").get("id"),"emotion":"positive"};
+	elements.add({"type":"text","text":"Created by " + " [View Profile]($1) " + " on " + created_at,"button_references":{"1":view_people_button}});
+	elements.add(dividerElement);
+	i = i + 1;
+	sections.add({"id":i,"elements":elements});
+}
+dataList = list();
+for each  todo in todos
+{
+	i = i + 1;
+	if(todo.get("url").equals(current_todo_url))
+	{
+		// skip current_entry
+		continue;
+	}
+	title = todo.get("title");
+	if(title.length() >= 50)
+	{
+		title = todo.subString(0,47) + "..";
+	}
+	description = "";
+	if(todo.get("description") != null)
+	{
+		description = todo.get("description");
+	}
+	description = description.replaceAll("&lt;","<").replaceAll("&gt;",">").replaceAll("&amp;","&");
+	description = description.replaceAll("<br>","\n");
+	description = description.replaceAll("<[^>]*>","");
+	description = description.trim();
+	if(description.length() >= 200)
+	{
+		description = description.subString(0,198) + "..";
+	}
+	eachData = Map();
+	eachData.put("title",title);
+	eachData.put("description",description);
+	eachData.put("image_url","https://i.imgur.com/McUuEPk.png");
+	eachData.put("icon_url","https://i.imgur.com/ZSIOsEj.png");
+	buttonList = {{"label":"Open","type":"invoke.function","name":"viewtodos","id":todo.get("url") + "|" + todos_url + "|1","emotion":"negative"}};
+	eachData.put("buttons",buttonList);
+	dataList.add(eachData);
+	if(i == 25)
+	{
+		break;
+	}
+}
+if(dataList.size() != 0)
+{
+	elements = list();
+	elements.add({"type":"title","text":"Other To-dos"});
+	elements.add({"type":"cards","data":dataList,"style":{"view":"gallery","size":"small"}});
+	elements.add({"type":"divider"});
+	sections.add({"id":2,"elements":elements});
+}
+header_title = "View " + todo_title;
+check_page_no = page_no + 1;
+if(current_todo_url == "next_page")
+{
+	header_title = "page " + page_no;
+	page_no = page_no + 1;
+}
+next_todos = invokeurl
+[
+	url :todos_url + "?page=" + check_page_no
+	type :GET
+	connection:"wrike"
+];
+info next_todos;
+header = {"title":header_title,"navigation":"continue","buttons":button};
+if(next_todos.size() != 0)
+{
+	footer = {"text":"","buttons":{{"label":"Next Page","emotion":"positive","type":"invoke.function","name":"viewtodos","id":"next_page" + "|" + todos_url + "|" + page_no}}};
+	return {"type":"applet","header":header,"footer":footer,"sections":sections,"active_tab":"To-dos"};
+}
+else
+{
+	return {"type":"applet","header":header,"sections":sections,"active_tab":"To-dos"};
+}

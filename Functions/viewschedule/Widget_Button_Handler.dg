@@ -1,0 +1,184 @@
+
+id = target.get("id");
+info id;
+splitIndex = id.indexOf("|");
+splitLastIndex = id.lastIndexOf("|");
+current_entry_url = id.substring(0,splitIndex);
+info current_entry_url;
+entries_url = id.substring(splitIndex + 1,splitLastIndex);
+info entries_url;
+page_no = id.substring(splitLastIndex + 1,id.length()).toNumber();
+info page_no;
+dividerElement = {"type":"divider"};
+file_image_url = "https://i.imgur.com/2VA4szx.png";
+button = List();
+button.add({"label":"Edit Default Project","emotion":"positive","type":"invoke.function","name":"configureprojectform","id":"Schedule"});
+entries = invokeurl
+[
+	url :entries_url + "?page=" + page_no
+	type :GET
+	connection:"wrike"
+];
+info entries;
+if(entries.size() == 0)
+{
+	header = {"title":"page " + page_no,"navigation":"continue","buttons":button};
+	sections = List();
+	elements = List();
+	elements.add({"type":"activity","title":"You don't have any more schedules🤔","description":"Use `/wrike Create a Schedule` in any Cliq chat to create your first schedule and start organizing your day! 📅💪","image_url":"https://i.imgur.com/ZSIOsEj.png"});
+	elements.add(dividerElement);
+	sections.add({"id":1,"elements":elements});
+	return {"type":"applet","header":header,"sections":sections,"active_tab":"Schedule"};
+	//return {"type":"applet","data_type":"info","info":{"title":" You don’t have any schedule yet.","description":"Click here to Create.","image_url":"https://i.imgur.com/ZSIOsEj.png"},"active_tab":"Schedule"};
+}
+sections = List();
+elements = List();
+i = 0;
+if(current_entry_url != "next_page")
+{
+	current_entry = invokeurl
+	[
+		url :current_entry_url
+		type :GET
+		connection:"wrike"
+	];
+	entry_summary = current_entry.get("summary");
+	if(entry_summary.length() >= 50)
+	{
+		entry_summary = entry_summary.subString(0,47) + "..";
+	}
+	creator_name = current_entry.get("creator").get("name");
+	if(creator_name.length() >= 20)
+	{
+		creator_name = creator_name.subString(0,18) + "..";
+	}
+	description = "";
+	if(current_entry.get("description") != null)
+	{
+		description = current_entry.get("description");
+	}
+	description = description.replaceAll("&lt;","<").replaceAll("&gt;",">").replaceAll("&amp;","&");
+	description = description.replaceAll("<br>","\n");
+	description = description.replaceAll("<[^>]*>","");
+	description = description.trim();
+	if(description.length() >= 200)
+	{
+		description = description.subString(0,198) + "..";
+	}
+	all_day = current_entry.get("all_day");
+	starts_at = current_entry.get("starts_at");
+	if(starts_at == null)
+	{
+		starts_at = "-";
+	}
+	starts_at = starts_at.replaceAll("T"," ").subString(0,starts_at.lastIndexOf(":"));
+	ends_at = current_entry.get("ends_at");
+	if(ends_at == null)
+	{
+		ends_at = "-";
+	}
+	ends_at = ends_at.replaceAll("T"," ").subString(0,ends_at.lastIndexOf(":"));
+	created_at = current_entry.get("created_at");
+	if(created_at == null)
+	{
+		created_at = "-";
+	}
+	created_at = created_at.replaceAll("T"," ").subString(0,created_at.lastIndexOf(":"));
+	all_day_emoji = "✖️";
+	if(all_day == true)
+	{
+		all_day_emoji = "✔️";
+	}
+	elements.add({"type":"title","text":entry_summary});
+	elements.add({"type":"text","text":description});
+	elements.add({"type":"buttons","buttons":{{"label":"View Comments","emotion":"negative","type":"invoke.function","name":"viewcomments","id":"Schedule" + "|" + current_entry.get("comments_url") + "|1"},{"label":"View","emotion":"positive","type":"open.url","url":current_entry.get("app_url")}}});
+	elements.add(dividerElement);
+	participants_name = "";
+	participants = current_entry.get("participants");
+	for each  participant in participants
+	{
+		participants_name = participants_name + " " + participant.get("name") + ",";
+	}
+	if(participants_name.length() >= 1)
+	{
+		participants_name = participants_name.substring(0,participants_name.length() - 1);
+	}
+	elements.add({"type":"fields","data":{{"All Day":all_day_emoji},{"Starts at":starts_at},{"Ends at":ends_at},{"Participants":participants_name}},"style":{"short":false}});
+	view_people_button = {"label":creator_name,"type":"invoke.function","name":"viewpeople","id":"Schedule" + "|" + current_entry.get("creator").get("id"),"emotion":"positive"};
+	elements.add({"type":"text","text":"Created by " + " [View Profile]($1) " + " on " + created_at,"button_references":{"1":view_people_button}});
+	elements.add(dividerElement);
+	i = i + 1;
+	sections.add({"id":i,"elements":elements});
+}
+dataList = list();
+for each  entry in entries
+{
+	i = i + 1;
+	if(entry.get("url").equals(current_entry_url))
+	{
+		// skip current_entry
+		continue;
+	}
+	summary = entry.get("summary");
+	if(summary.length() >= 50)
+	{
+		summary = entry.subString(0,47) + "..";
+	}
+	description = "";
+	if(entry.get("description") != null)
+	{
+		description = entry.get("description");
+	}
+	description = description.replaceAll("&lt;","<").replaceAll("&gt;",">").replaceAll("&amp;","&");
+	description = description.replaceAll("<br>","\n");
+	description = description.replaceAll("<[^>]*>","");
+	description = description.trim();
+	if(description.length() >= 200)
+	{
+		description = description.subString(0,198) + "..";
+	}
+	eachData = Map();
+	eachData.put("title",summary);
+	eachData.put("description",description);
+	eachData.put("image_url","https://i.imgur.com/N6c9bLZ.png");
+	eachData.put("icon_url","https://i.imgur.com/ZSIOsEj.png");
+	buttonList = {{"label":"Open","type":"invoke.function","name":"viewschedule","id":entry.get("url") + "|" + entries_url + "|" + page_no,"emotion":"negative"}};
+	eachData.put("buttons",buttonList);
+	dataList.add(eachData);
+	if(i == 20)
+	{
+		break;
+	}
+}
+if(dataList.size() != 0)
+{
+	elements = list();
+	elements.add({"type":"title","text":"Other Schedule"});
+	elements.add({"type":"cards","data":dataList,"style":{"view":"gallery","size":"small"}});
+	elements.add({"type":"divider"});
+	sections.add({"id":2,"elements":elements});
+}
+header_title = "View " + entry_summary;
+check_page_no = page_no + 1;
+if(current_entry_url == "next_page")
+{
+	header_title = "page " + page_no;
+	page_no = page_no + 1;
+}
+next_entries = invokeurl
+[
+	url :entries_url + "?page=" + check_page_no
+	type :GET
+	connection:"wrike"
+];
+info next_entries;
+header = {"title":header_title,"navigation":"continue","buttons":button};
+if(next_entries.size() != 0)
+{
+	footer = {"text":"","buttons":{{"label":"Next Page","emotion":"positive","type":"invoke.function","name":"viewschedule","id":"next_page" + "|" + entries_url + "|" + page_no}}};
+	return {"type":"applet","header":header,"sections":sections,"footer":footer,"active_tab":"Schedule"};
+}
+else
+{
+	return {"type":"applet","header":header,"sections":sections,"active_tab":"Schedule"};
+}

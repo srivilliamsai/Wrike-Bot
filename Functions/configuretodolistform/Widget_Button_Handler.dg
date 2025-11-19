@@ -1,0 +1,65 @@
+
+query = Map();
+query.put("criteria","userid=" + user.get("id"));
+db = zoho.cliq.getRecords("wrikedb",query);
+account_id = db.get("list").get(0).get("accountid");
+project_id = db.get("list").get(0).get("projectid");
+project = invokeurl
+[
+	url :"https://www.wrike.com/api/v4/" + account_id + "/folders/" + project_id + ""
+	type :GET
+	connection:"wrike"
+];
+dock = project.get("dock");
+info dock;
+todosets_url = "";
+for each  d in dock
+{
+	if(d.get("name") == "todoset")
+	{
+		todosets_url = d.get("url");
+		break;
+	}
+}
+todosets = invokeurl
+[
+	url :todosets_url
+	type :GET
+	connection:"wrike"
+];
+info todosets;
+todolists_url = todosets.get("todolists_url");
+todolists = invokeurl
+[
+	url :todolists_url
+	type :GET
+	connection:"wrike"
+];
+info todolists;
+options = List();
+for each  todolist in todolists
+{
+	name = todolist.get("name");
+	if(name.length() >= 50)
+	{
+		name = name.subString(0,47) + "..";
+	}
+	todolist_id = todolist.get("id");
+	option = {"label":name,"value":todolist_id};
+	options.add(option);
+}
+if(options.size() == 0)
+{
+	// no projects in account
+	elements = list();
+	elements.add({"type":"activity","title":"You don't have any To-do List yet! 🤔","description":"Use `/wrike Create a To-do List` in any Cliq chat to create your first To-do List and start organizing your day! 📅💪","image_url":"https://i.imgur.com/ZSIOsEj.png"});
+	sections = list();
+	sections.add({"id":1,"elements":elements});
+	header = {"title":"To-dos"};
+	return {"type":"applet","header":header,"sections":sections,"active_tab":"To-dos"};
+}
+inputs = list();
+inputs.add({"type":"dynamic_select","name":"todolist_id","label":"To-do List","placeholder":"Choose a To-do List","mandatory":true,"options":options});
+inputs.add({"name":"type","value":"configure","type":"hidden"});
+form = {"type":"form","title":"Configure To-do List","name":"form","version":1,"button_label":"Configure","actions":{"submit":{"type":"invoke.function","name":"createtodos"}},"inputs":inputs};
+return form;

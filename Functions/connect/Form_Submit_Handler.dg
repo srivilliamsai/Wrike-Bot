@@ -1,0 +1,61 @@
+
+form_data = form.get("values");
+account_id = form_data.get("account_id").get("value");
+account_name = form_data.get("account_id").get("label");
+query = Map();
+query.put("criteria","userid=" + user.get("id"));
+db_exist = zoho.cliq.getRecords("wrikedb",query);
+exit_account_id = db_exist.get("list").get(0).get("accountid");
+exit_account_name = db_exist.get("list").get(0).get("accountname");
+record_id = db_exist.get("list").get(0).get("id");
+values = Map();
+values.put("accountid",account_id);
+values.put("accountname",account_name);
+values.put("projectid",0);
+values.put("todolistid",0);
+db = zoho.cliq.updateRecord("wrikedb",record_id,values);
+if(exit_account_id != account_id)
+{
+	if(db.get("status").equalsIgnoreCase("SUCCESS"))
+	{
+		response = Map();
+		bot = Map();
+		bot.put("name","Wrike Bot");
+		bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+		response.put("bot",bot);
+		card = Map();
+		card.put("theme","modern-inline");
+		card.put("thumbnail","https://i.imgur.com/ZSIOsEj.png");
+		response.put("card",card);
+		response.put("text","Hey [" + user.get("first_name") + "](zohoid:" + user.get("zoho_user_id") + ") 🎉\n You've successfully switched account from " + exit_account_name + " to " + account_name);
+		return response;
+	}
+	else
+	{
+		response = Map();
+		bot = Map();
+		bot.put("name","Wrike Bot");
+		bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+		response.put("bot",bot);
+		card = Map();
+		card.put("theme","modern-inline");
+		response.put("card",card);
+		response.put("text","⚠️ Oops! Something went wrong. 😔 Please try again later");
+		return response;
+	}
+}
+else
+{
+	response = Map();
+	bot = Map();
+	bot.put("name","Wrike Bot");
+	bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+	response.put("bot",bot);
+	card = Map();
+	card.put("theme","modern-inline");
+	card.put("thumbnail","https://i.imgur.com/ZSIOsEj.png");
+	response.put("card",card);
+	response.put("text","Hey [" + user.get("first_name") + "](zohoid:" + user.get("zoho_user_id") + ") 👋.\n it looks like you haven't switched accounts. You're still configured as " + account_name);
+	return response;
+}
+return Map();

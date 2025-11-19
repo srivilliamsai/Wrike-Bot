@@ -1,0 +1,142 @@
+
+form_data = form.get("values");
+info form_data;
+info form_data.get("todos_url");
+if(form_data.get("todos_url") == null)
+{
+	info "error banner";
+	banner = {"text":"The selected project lacks a To-do list. Create one with \"/wrike create a To-do List\" to proceed.","status":"failure","type":"banner"};
+	return banner;
+}
+todos_url = form_data.get("todos_url").get("value").replaceAll("-","/");
+todolist_name = form_data.get("todos_url").get("label");
+todos = invokeurl
+[
+	url :todos_url
+	type :GET
+	connection:"wrike"
+];
+info todos;
+if(todos.size() != 0)
+{
+	response = Map();
+	bot = Map();
+	bot.put("name","Wrike Bot");
+	bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+	response.put("bot",bot);
+	card = Map();
+	card.put("title","To-do List Tasks 📋");
+	card.put("theme","modern-inline");
+	response.put("card",card);
+	slidesList = list();
+	i = 0;
+	for each  current_todo in todos
+	{
+		todo_title = current_todo.get("title");
+		if(todo_title.length() >= 50)
+		{
+			todo_title = todo_title.subString(0,47) + "..";
+		}
+		description = "-";
+		if(current_todo.get("description") != null)
+		{
+			description = current_todo.get("description");
+		}
+		description = description.replaceAll("&lt;","<").replaceAll("&gt;",">").replaceAll("&amp;","&");
+		description = description.replaceAll("<br>","\n");
+		description = description.replaceAll("<[^>]*>","");
+		description = description.trim();
+		if(description.length() >= 50)
+		{
+			description = description.subString(0,47) + "..";
+		}
+		due_on = current_todo.get("due_on");
+		if(due_on == null)
+		{
+			due_on = "-";
+		}
+		due_on = due_on.replaceAll("T"," ").subString(0,due_on.lastIndexOf(":"));
+		assignees_name = "";
+		assignees = current_todo.get("assignees");
+		info assignees;
+		for each  assignee in assignees
+		{
+			assignees_name = assignees_name + " " + assignee.get("name") + ",";
+		}
+		if(assignees_name.length() >= 1)
+		{
+			assignees_name = assignees_name.substring(0,assignees_name.length() - 1);
+		}
+		slidesList0 = Map();
+		slidesList0.put("type","text");
+		slidesList0.put("title",todo_title);
+		slidesList0.put("data","Description: " + description);
+		slidesList.add(slidesList0);
+		slidesList1 = Map();
+		slidesList1.put("type","label");
+		dataList = list();
+		dataList0 = Map();
+		dataList0.put("Due on",due_on);
+		dataList.add(dataList0);
+		dataList1 = Map();
+		dataList1.put("Assignees",assignees_name);
+		dataList.add(dataList1);
+		slidesList1.put("data",dataList);
+		buttonsList = list();
+		buttonsList0 = Map();
+		buttonsList0.put("label","View To-do");
+		//buttonsList0.put("type","+");
+		action = Map();
+		action.put("type","open.url");
+		data = Map();
+		data.put("web",current_todo.get("app_url"));
+		action.put("data",data);
+		buttonsList0.put("action",action);
+		buttonsList.add(buttonsList0);
+		//function button
+		buttonsList1 = Map();
+		buttonsList1.put("label","More Details");
+		buttonsList1.put("type","+");
+		action = Map();
+		action.put("type","invoke.function");
+		data = Map();
+		data.put("name","viewcontent");
+		action.put("data",data);
+		buttonsList1.put("action",action);
+		buttonsList1.put("key","todos_url|" + current_todo.get("url"));
+		buttonsList.add(buttonsList1);
+		slidesList1.put("buttons",buttonsList);
+		slidesList.add(slidesList1);
+		i = i + 1;
+		if(i == 10)
+		{
+			break;
+		}
+	}
+	query = Map();
+	query.put("criteria","userid=" + user.get("id"));
+	db = zoho.cliq.getRecords("wrikedb",query);
+	account_id = db.get("list").get(0).get("accountid");
+	project_url = "https://www.wrike.com/open.htm?id=" + todos.get(0).get("folder").get("id");
+	response.put("slides",slidesList);
+	response.put("text","Project: [" + todos.get(0).get("folder").get("name") + "](" + project_url + ")" + "\nTo-do List: [" + todos.get(0).get("parent").get("title") + "](" + todos.get(0).get("parent").get("app_url") + ")");
+	info response;
+	return response;
+}
+else
+{
+	info "no due tasks";
+	response = Map();
+	bot = Map();
+	bot.put("name","Wrike Bot");
+	bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+	response.put("bot",bot);
+	card = Map();
+	card.put("title","To-do List Empty! 📝");
+	card.put("theme","modern-inline");
+	response.put("card",card);
+	response.put("text","You don't have any To-dos yet!\nUse `/wrike Create a To-do` in any Cliq chat or use the message action (select a message, click more, and then click `Create a To-do`) to create your first task and start organizing your day! 📅💪");
+	info response;
+	return response;
+}
+return Map();

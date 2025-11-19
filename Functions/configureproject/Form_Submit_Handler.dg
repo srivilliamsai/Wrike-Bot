@@ -1,0 +1,165 @@
+
+form_data = form.get("values");
+project_id = form_data.get("project_id").get("value");
+query = Map();
+query.put("criteria","userid=" + user.get("id"));
+db_query = zoho.cliq.getRecords("wrikedb",query);
+old_project_id = db_query.get("list").get(0).get("projectid");
+if(old_project_id == project_id)
+{
+	return Map();
+}
+record_id = db_query.get("list").get(0).get("id");
+values = Map();
+values.put("projectid",project_id);
+values.put("todolistid",0);
+db = zoho.cliq.updateRecord("wrikedb",record_id,values);
+if(db.get("status").equalsIgnoreCase("SUCCESS"))
+{
+	account_id = db_query.get("list").get(0).get("accountid");
+	info account_id;
+	// show project after user edit default project
+	id = "Project";
+	dividerElement = {"type":"divider"};
+	footer_text = "";
+	editDefaultProject = {"label":"Edit Default Project","emotion":"positive","type":"invoke.function","name":"configureprojectform","id":id};
+	tabsList = {{"label":"Project","id":"Project"},{"label":"To-dos","id":"To-dos"},{"label":"Schedule","id":"Schedule"},{"label":"Files","id":"Files"},{"label":"Documents","id":"Documents"}};
+	project = invokeurl
+	[
+		url :"https://www.wrike.com/api/v4/" + account_id + "/folders/" + project_id + ""
+		type :GET
+		connection:"wrike"
+	];
+	info project;
+	project_name = project.get("name");
+	if(project_name.length() >= 50)
+	{
+		project_name = project_name.subString(0,47) + "..";
+	}
+	project_description = project.get("description");
+	project_status = project.get("status");
+	project_status_emoji = "🟢";
+	if(project_status != "active")
+	{
+		project_status_emoji = "🔴";
+	}
+	project_clients_enabled = project.get("clients_enabled");
+	project_clients_enabled_emoji = "✔️";
+	if(project_clients_enabled != true)
+	{
+		project_clients_enabled_emoji = "✖️";
+	}
+	project_timesheet_enabled = project.get("timesheet_enabled");
+	project_timesheet_enabled_emoji = "✔️";
+	if(project_timesheet_enabled != true)
+	{
+		project_timesheet_enabled_emoji = "✖️";
+	}
+	project_created_at = project.get("created_at");
+	project_app_url = project.get("app_url");
+	project_last_needle_position = project.get("last_needle_position");
+	if(project_last_needle_position == null)
+	{
+		project_last_needle_position = 0;
+	}
+	created_at = project.get("created_at");
+	if(created_at == null)
+	{
+		created_at = "-";
+	}
+	created_at = created_at.replaceAll("T"," ").subString(0,created_at.lastIndexOf(":"));
+	project_last_needle_color = project.get("last_needle_color");
+	Needle_info = {"green":"On track","yellow":"Some risk","red":"Concerned"};
+	Needle_data = {{"label":"Completed","value":project_last_needle_position},{"label":"Pending","value":100 - project_last_needle_position}};
+	sections = list();
+	elements1 = list();
+	elements1.add({"type":"percentage_chart","styles":{"preview":"semi_doughnut"},"data":Needle_data});
+	sections.add({"id":1,"elements":elements1});
+	elements2 = list();
+	elements2.add({"type":"fields","data":{{"Status":project_status_emoji + " " + project_status},{"Needle Status":Needle_info.get(project_last_needle_color)},{"Clients Enabled":project_clients_enabled_emoji},{"Project Description":project_description},{"Timesheet Enabled":project_timesheet_enabled_emoji},{"Created at":created_at}},"style":{"short":false}});
+	elements2.add(dividerElement);
+	sections.add({"id":2,"elements":elements2});
+	elements3 = list();
+	docks = project.get("dock");
+	for each  dock in docks
+	{
+		if(dock.get("name") == "todoset")
+		{
+			todoset_url = dock.get("url");
+			break;
+		}
+	}
+	todoset = invokeurl
+	[
+		url :todoset_url
+		type :GET
+		connection:"wrike"
+	];
+	info todoset;
+	completed_ratio = todoset.get("completed_ratio");
+	info completed_ratio;
+	splitIndex = completed_ratio.indexOf("/");
+	num = completed_ratio.subString(0,splitIndex).toNumber();
+	den = completed_ratio.subString(splitIndex + 1,completed_ratio.length()).toNumber();
+	if(num == 0 || den == 0)
+	{
+		todoset_ratio = 0;
+	}
+	else
+	{
+		todoset_ratio = (num * 100) / den;
+	}
+	todoset_data = {{"label":"Completed","value":todoset_ratio},{"label":"Pending","value":100 - todoset_ratio}};
+	elements3.add({"type":"text","text":"To-do Accomplishment Ratio"});
+	elements3.add({"type":"percentage_chart","styles":{"preview":"semi_doughnut"},"data":todoset_data});
+	elements3.add(dividerElement);
+	sections.add({"id":3,"elements":elements3});
+	peoples = invokeurl
+	[
+		url :"https://www.wrike.com/api/v4/contacts?folderId=" + project_id
+		type :GET
+		connection:"wrike"
+	];
+	info peoples;
+	dataList = list();
+	people_count = 1;
+	for each  people in peoples
+	{
+		eachData = Map();
+		eachData.put("title",people.get("name"));
+		eachData.put("description",people.get("email_address"));
+		eachData.put("image_url",people.get("avatar_url"));
+		eachData.put("icon_url",people.get("avatar_url"));
+		buttonList = {{"label":"View Details","type":"invoke.function","name":"viewpeople","id":id + "|" + people.get("id"),"emotion":"positive"}};
+		eachData.put("buttons",buttonList);
+		dataList.add(eachData);
+		if(people_count == 24)
+		{
+			break;
+		}
+		people_count = people_count + 1;
+	}
+	if(dataList.size() >= 1)
+	{
+		elements4 = list();
+		elements4.add({"type":"title","text":"Active People on this Project"});
+		elements4.add({"type":"cards","data":dataList,"style":{"view":"gallery","size":"small"}});
+		elements4.add(dividerElement);
+		sections.add({"id":4,"elements":elements4});
+	}
+	button = List();
+	button.add(editDefaultProject);
+	button.add({"label":"View","type":"open.url","url":project_app_url});
+	header = {"title":project_name,"navigation":"new","buttons":button};
+	return {"type":"applet","header":header,"sections":sections,"tabs":tabsList,"active_tab":id};
+}
+else
+{
+	elements = list();
+	elements.add({"type":"title","text":"⚠️ Oops! Something went wrong. 😔 Please try again later"});
+	sections = list();
+	sections.add({"id":1,"elements":elements});
+	header = {"title":"Error"};
+	return {"type":"applet","header":header,"sections":sections,"active_tab":"Project"};
+}
+return Map();

@@ -1,0 +1,283 @@
+
+form_data = form.get("values");
+type = form_data.get("type");
+if(type == "configure")
+{
+	todolist_id = form_data.get("todolist_id").get("value");
+	query = Map();
+	query.put("criteria","userid=" + user.get("id"));
+	db_query = zoho.cliq.getRecords("wrikedb",query);
+	record_id = db_query.get("list").get(0).get("id");
+	values = Map();
+	values.put("todolistid",todolist_id);
+	db = zoho.cliq.updateRecord("wrikedb",record_id,values);
+	if(db.get("status").equalsIgnoreCase("SUCCESS"))
+	{
+		id = "To-dos";
+		dividerElement = {"type":"divider"};
+		footer = {"text":""};
+		footer_text = "";
+		editDefaultProject = {"label":"Edit Default Project","emotion":"positive","type":"invoke.function","name":"configureprojectform","id":id};
+		tabsList = {{"label":"Project","id":"Project"},{"label":"To-dos","id":"To-dos"},{"label":"Schedule","id":"Schedule"},{"label":"Files","id":"Files"},{"label":"Documents","id":"Documents"}};
+		account_id = db_query.get("list").get(0).get("accountid");
+		project_id = db_query.get("list").get(0).get("projectid");
+		if(todolist_id != 0)
+		{
+			button = List();
+			button.add(editDefaultProject);
+			button.add({"label":"Edit Default To-do List","type":"invoke.function","name":"configuretodolistform","emotion":"positive","id":"configuration"});
+			header = {"title":"To-dos (page 1)","navigation":"new","buttons":button};
+			todos_url = "https://www.wrike.com/api/v4/" + account_id + "/folders/" + project_id + "/folders/" + todolist_id + "/tasks";
+			todos = invokeurl
+			[
+				url :todos_url
+				type :GET
+				connection:"wrike"
+			];
+			info todos;
+			if(todos.size() == 0)
+			{
+				sections = List();
+				elements = List();
+				elements.add({"type":"activity","title":"To-do List Empty! 📝","description":"You don't have any To-dos yet!\nUse `/wrike Create a To-do` in any Cliq chat or use the message action (select a message, click more, and then click `Create a To-do`) to create your first task and start organizing your day! 📅💪","image_url":"https://i.imgur.com/ZSIOsEj.png"});
+				elements.add(dividerElement);
+				sections.add({"id":1,"elements":elements});
+				return {"type":"applet","header":header,"footer":footer,"sections":sections,"tabs":tabsList,"active_tab":id};
+				//return {"type":"applet","data_type":"info","tabs":tabsList,"info":{"title":" You don’t have any todos yet.","description":"Click here to Create.","image_url":"https://i.imgur.com/ZSIOsEj.png"},"active_tab":id};
+			}
+			current_todo = todos.get(0);
+			sections = List();
+			elements = List();
+			todo_title = current_todo.get("title");
+			if(todo_title.length() >= 50)
+			{
+				todo_title = todo_title.subString(0,47) + "..";
+			}
+			creator_name = current_todo.get("creator").get("name");
+			if(creator_name.length() >= 20)
+			{
+				creator_name = creator_name.subString(0,18) + "..";
+			}
+			description = "";
+			if(current_todo.get("description") != null)
+			{
+				description = current_todo.get("description");
+			}
+			description = description.replaceAll("&lt;","<").replaceAll("&gt;",">").replaceAll("&amp;","&");
+			description = description.replaceAll("<br>","\n");
+			description = description.replaceAll("<[^>]*>","");
+			description = description.trim();
+			starts_on = current_todo.get("starts_on");
+			if(starts_on == null)
+			{
+				starts_on = "-";
+			}
+			starts_on = starts_on.replaceAll("T"," ").subString(0,starts_on.lastIndexOf(":"));
+			due_on = current_todo.get("due_on");
+			if(due_on == null)
+			{
+				due_on = "-";
+			}
+			due_on = due_on.replaceAll("T"," ").subString(0,due_on.lastIndexOf(":"));
+			created_at = current_todo.get("created_at");
+			if(created_at == null)
+			{
+				created_at = "-";
+			}
+			created_at = created_at.replaceAll("T"," ").subString(0,created_at.lastIndexOf(":"));
+			completed_emoji = "✖️";
+			if(current_todo.get("completed") == true)
+			{
+				completed_emoji = "✔️";
+			}
+			elements.add({"type":"title","text":todo_title});
+			elements.add({"type":"text","text":description});
+			elements.add({"type":"buttons","buttons":{{"label":"View Comments","emotion":"negative","type":"invoke.function","name":"viewcomments","id":id + "|" + current_todo.get("comments_url") + "|1"},{"label":"View","emotion":"positive","type":"open.url","url":current_todo.get("app_url")}}});
+			elements.add(dividerElement);
+			assignees_name = "";
+			assignees = current_todo.get("assignees");
+			info assignees;
+			for each  assignee in assignees
+			{
+				assignees_name = assignees_name + " " + assignee.get("name") + ",";
+			}
+			if(assignees_name.length() >= 1)
+			{
+				assignees_name = assignees_name.substring(0,assignees_name.length() - 1);
+			}
+			elements.add({"type":"fields","data":{{"Completed":completed_emoji},{"Starts on":starts_on},{"Due on":due_on},{"Assignees":assignees_name}},"style":{"short":false}});
+			view_people_button = {"label":creator_name,"type":"invoke.function","name":"viewpeople","id":id + "|" + current_todo.get("creator").get("id"),"emotion":"positive"};
+			elements.add({"type":"text","text":"Created by " + " [View Profile]($1) " + " on " + created_at,"button_references":{"1":view_people_button}});
+			elements.add(dividerElement);
+			sections.add({"id":1,"elements":elements});
+			i = 0;
+			dataList = list();
+			for each  todo in todos
+			{
+				i = i + 1;
+				if(i == 1)
+				{
+					// skip current_entry
+					continue;
+				}
+				title = todo.get("title");
+				if(title.length() >= 50)
+				{
+					title = todo.subString(0,47) + "..";
+				}
+				description = "";
+				if(todo.get("description") != null)
+				{
+					description = todo.get("description");
+				}
+				description = description.replaceAll("&lt;","<").replaceAll("&gt;",">").replaceAll("&amp;","&");
+				description = description.replaceAll("<br>","\n");
+				description = description.replaceAll("<[^>]*>","");
+				description = description.trim();
+				eachData = Map();
+				eachData.put("title",title);
+				eachData.put("description",description);
+				eachData.put("image_url","https://i.imgur.com/McUuEPk.png");
+				eachData.put("icon_url","https://i.imgur.com/ZSIOsEj.png");
+				buttonList = {{"label":"Open","type":"invoke.function","name":"viewtodos","id":todo.get("url") + "|" + todos_url + "|1","emotion":"negative"}};
+				eachData.put("buttons",buttonList);
+				dataList.add(eachData);
+				if(i == 15)
+				{
+					break;
+				}
+			}
+			if(dataList.size() != 0)
+			{
+				elements = list();
+				elements.add({"type":"title","text":"Other To-dos"});
+				elements.add({"type":"cards","data":dataList,"style":{"view":"gallery","size":"small"}});
+				elements.add({"type":"divider"});
+				sections.add({"id":2,"elements":elements});
+			}
+			next_todos = invokeurl
+			[
+				url :todos_url + "?page=2"
+				type :GET
+				connection:"wrike"
+			];
+			info next_todos;
+			if(next_todos.size() != 0)
+			{
+				footer = {"text":footer_text,"buttons":{{"label":"Next Page","emotion":"positive","type":"invoke.function","name":"viewtodos","id":"next_page" + "|" + todos_url + "|2"}}};
+				return {"type":"applet","header":header,"footer":footer,"sections":sections,"tabs":tabsList,"active_tab":id};
+			}
+			else
+			{
+				// no footer
+				return {"type":"applet","header":header,"sections":sections,"tabs":tabsList,"active_tab":id};
+			}
+		}
+		return {"type":"applet","data_type":"info","tabs":tabsList,"info":{"title":"Your default To-do List is not configured yet!","description":"Click here to configure.","image_url":"https://i.imgur.com/ZSIOsEj.png","button":{"label":"Configure Default To-do List","type":"invoke.function","name":"configuretodolistform","emotion":"positive","id":"configuration"}},"active_tab":id};
+	}
+	else
+	{
+		elements = list();
+		elements.add({"type":"title","text":"⚠️ Oops! Something went wrong. 😔 Please try again later"});
+		sections = list();
+		sections.add({"id":1,"elements":elements});
+		header = {"title":"Error","navigation":"continue"};
+		return {"type":"applet","header":header,"sections":sections,"active_tab":"Project"};
+	}
+	return Map();
+}
+info form_data;
+info form_data.get("todos_url");
+if(form_data.get("todos_url") == null)
+{
+	info "error banner";
+	banner = {"text":"The selected project lacks a To-do list. Create one with \"/wrike create a To-do List\" to proceed.","status":"failure","type":"banner"};
+	return banner;
+}
+todos_url = form_data.get("todos_url").get("value").replaceAll("-","/");
+todolist_name = form_data.get("todos_url").get("label");
+name = form_data.get("name").replaceAll("\n"," ").replaceAll("\t"," ").replaceAll("\r"," ");
+description = form_data.get("description").replaceAll("\n","<br>").replaceAll("\t"," ").replaceAll("\r"," ");
+assignees = form_data.get("assignees");
+assignee_ids = List();
+for each  assignee in assignees
+{
+	assignee_ids.add(assignee.get("value"));
+}
+due_on = form_data.get("due_on");
+parameters = Map();
+parameters.put("content",name);
+parameters.put("description",description);
+parameters.put("assignee_ids",assignee_ids);
+parameters.put("due_on",due_on);
+headers = Map();
+headers.put("Content-Type","application/json");
+todos = invokeurl
+[
+	url :todos_url
+	type :POST
+	parameters:toString(parameters)
+	headers:headers
+	connection:"wrike"
+];
+info todos;
+if(todos.containskey("app_url"))
+{
+	app_url = todos.get("app_url");
+	response = Map();
+	bot = Map();
+	bot.put("name","Wrike Bot");
+	bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+	response.put("bot",bot);
+	card = Map();
+	card.put("title","[To-do](" + todos.get("parent").get("app_url") + ")");
+	card.put("theme","modern-inline");
+	card.put("icon","https://i.imgur.com/ZSIOsEj.png");
+	card.put("thumbnail","https://i.imgur.com/ZSIOsEj.png");
+	response.put("card",card);
+	buttonsList = list();
+	buttonsList0 = Map();
+	buttonsList0.put("label","View To-do");
+	//buttonsList0.put("type","+");
+	action = Map();
+	action.put("type","open.url");
+	data = Map();
+	data.put("web",app_url);
+	action.put("data",data);
+	buttonsList0.put("action",action);
+	buttonsList.add(buttonsList0);
+	//function button
+	buttonsList1 = Map();
+	buttonsList1.put("label","More Details");
+	buttonsList1.put("type","+");
+	action = Map();
+	action.put("type","invoke.function");
+	data = Map();
+	data.put("name","viewcontent");
+	action.put("data",data);
+	buttonsList1.put("action",action);
+	buttonsList1.put("key","todos_url|" + todos.get("url"));
+	buttonsList.add(buttonsList1);
+	response.put("buttons",buttonsList);
+	query = Map();
+	query.put("criteria","userid=" + user.get("id"));
+	db = zoho.cliq.getRecords("wrikedb",query);
+	account_id = db.get("list").get(0).get("accountid");
+	project_url = "https://www.wrike.com/open.htm?id=" + todos.get("folder").get("id");
+	response.put("text","Hey [" + user.get("first_name") + "](zohoid:" + user.get("zoho_user_id") + ") 👋 \nProject Name: [" + todos.get("folder").get("name") + "](" + project_url + ") \n\nYou've successfully created a To-do : " + name + " within " + todolist_name + ". Keep up the great work!");
+	return response;
+}
+else
+{
+	response = Map();
+	bot = Map();
+	bot.put("name","Wrike Bot");
+	bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+	response.put("bot",bot);
+	card = Map();
+	card.put("theme","modern-inline");
+	response.put("card",card);
+	response.put("text","⚠️ Oops! Something went wrong. 😔 Please try again later");
+	return response;
+}
+return Map();

@@ -1,0 +1,42 @@
+
+query = Map();
+query.put("criteria","userid=" + user.get("id"));
+db = zoho.cliq.getRecords("wrikedb",query);
+record_id = db.get("list").get(0).get("id");
+account_id = db.get("list").get(0).get("accountid");
+projects = invokeurl
+[
+	url :"https://www.wrike.com/api/v4/" + account_id + "/folders"
+	type :GET
+	connection:"wrike"
+];
+info projects;
+options = List();
+for each  project in projects
+{
+	project_name = project.get("name");
+	if(project_name.length() >= 50)
+	{
+		project_name = project_name.subString(0,47) + "..";
+	}
+	project_id = project.get("id");
+	option = Map();
+	option.put("value",project_id);
+	option.put("label",project_name);
+	option.put("thumbnail","https://i.imgur.com/ZSIOsEj.png");
+	options.add(option);
+}
+if(options.size() == 0)
+{
+	// no projects in account
+	elements = list();
+	elements.add({"type":"activity","title":"You don't have any projects yet! 🤔","description":"","image_url":"https://i.imgur.com/ZSIOsEj.png"});
+	sections = list();
+	sections.add({"id":1,"elements":elements});
+	header = {"title":"Project"};
+	return {"type":"applet","header":header,"sections":sections,"active_tab":"Project"};
+}
+inputs = list();
+inputs.add({"name":"project_id","label":"Project Name","placeholder":"Choose a Project","multiple":false,"mandatory":true,"type":"dynamic_select","options":options});
+form = {"type":"form","title":"Configure Project","name":"form","version":1,"button_label":"Configure","actions":{"submit":{"type":"invoke.function","name":"configureproject"}},"inputs":inputs};
+return form;

@@ -1,0 +1,415 @@
+
+info arguments;
+if(arguments.get("key") != null)
+{
+	// button function 
+	active_tab = arguments.get("key");
+	info active_tab;
+	if(active_tab.startsWith("todos_url"))
+	{
+		splitIndex = active_tab.indexOf("|");
+		current_todo_url = active_tab.substring(splitIndex + 1,active_tab.length());
+		info current_todo_url;
+		active_tab = active_tab.substring(0,splitIndex);
+		info active_tab;
+	}
+}
+else
+{
+	// widget button function 
+	id = target.get("id");
+	info id;
+	splitIndex = id.indexOf("|");
+	splitLastIndex = id.lastIndexOf("|");
+	active_tab = id.substring(0,splitIndex);
+	info active_tab;
+	url = id.substring(splitIndex + 1,splitLastIndex);
+	info url;
+	page_no = id.substring(splitLastIndex + 1,id.length()).toNumber();
+	info page_no;
+	dividerElement = {"type":"divider"};
+	file_image_url = "https://i.imgur.com/2VA4szx.png";
+	doc_image_url = "https://i.imgur.com/2VA4szx.png";
+	footer_text = "";
+	editDefaultProject = {"label":"Edit Default Project","emotion":"positive","type":"invoke.function","name":"configureprojectform","id":active_tab};
+	sections = List();
+	elements = List();
+	button = List();
+	button.add(editDefaultProject);
+	header = {"title":"page " + page_no,"navigation":"continue","buttons":button};
+}
+if(active_tab == "Files")
+{
+	uploads = invokeurl
+	[
+		url :url + "?page=" + page_no
+		type :GET
+		connection:"wrike"
+	];
+	info uploads;
+	if(uploads.size() == 0)
+	{
+		elements.add({"type":"activity","title":"📄 You don't have any more files 🤔","description":"","image_url":"https://i.imgur.com/ZSIOsEj.png"});
+		elements.add(dividerElement);
+		sections.add({"id":1,"elements":elements});
+		return {"type":"applet","header":header,"sections":sections,"active_tab":active_tab};
+		//return {"type":"applet","data_type":"info","tabs":tabsList,"info":{"title":"📄 You don’t have any files yet.","description":"Click here to Create.","image_url":"https://i.imgur.com/ZSIOsEj.png"},"active_tab":id};
+	}
+	i = 1;
+	for each  upload in uploads
+	{
+		creator_name = upload.get("creator").get("name");
+		if(creator_name.length() >= 20)
+		{
+			creator_name = creator_name.subString(0,18) + "..";
+		}
+		description = "";
+		if(upload.get("description") != null)
+		{
+			description = upload.get("description");
+		}
+		description = description.replaceAll("&lt;","<").replaceAll("&gt;",">").replaceAll("&amp;","&");
+		description = description.replaceAll("<br>","\n");
+		description = description.replaceAll("<[^>]*>","");
+		description = description.trim();
+		if(description.length() >= 100)
+		{
+			description = description.subString(0,98) + "..";
+		}
+		view_people_button = {"label":creator_name,"type":"invoke.function","name":"viewpeople","id":active_tab + "|" + upload.get("creator").get("id"),"emotion":"positive"};
+		elements = List();
+		elements.add({"type":"activity","title":upload.get("title"),"description":description + "\nCreated by " + " [View Profile]($1)","image_url":file_image_url,"button_references":{"1":view_people_button}});
+		elements.add({"type":"buttons","buttons":{{"label":"View Comments","emotion":"positive","type":"invoke.function","name":"viewcomments","id":active_tab + "|" + upload.get("comments_url") + "|1"},{"label":"View","emotion":"positive","type":"open.url","url":upload.get("app_url")},{"label":"Download","emotion":"negative","type":"open.url","url":upload.get("app_download_url")}}});
+		elements.add(dividerElement);
+		sections.add({"id":i,"elements":elements});
+		i = i + 1;
+		if(i == 18)
+		{
+			break;
+		}
+	}
+	page_no = page_no + 1;
+	next_files = invokeurl
+	[
+		url :url + "?page=" + page_no
+		type :GET
+		connection:"wrike"
+	];
+	info next_files;
+	if(next_files.size() != 0)
+	{
+		footer = {"text":footer_text,"buttons":{{"label":"Next Page","emotion":"positive","type":"invoke.function","name":"viewcontent","id":active_tab + "|" + url + "|" + page_no}}};
+		return {"type":"applet","header":header,"footer":footer,"sections":sections,"active_tab":active_tab};
+	}
+	else
+	{
+		return {"type":"applet","header":header,"sections":sections,"active_tab":active_tab};
+	}
+}
+else if(active_tab == "Documents")
+{
+	documents = invokeurl
+	[
+		url :url + "?page=" + page_no
+		type :GET
+		connection:"wrike"
+	];
+	info documents;
+	if(documents.size() == 0)
+	{
+		elements.add({"type":"activity","title":"📄 You don't have any more documents🤔","description":"Use `/wrike Create a Document` in any Cliq chat or use the message action (select a message, click more, and then click `Create a Document`) to create your first document 📚✨","image_url":"https://i.imgur.com/ZSIOsEj.png"});
+		elements.add(dividerElement);
+		sections.add({"id":1,"elements":elements});
+		return {"type":"applet","header":header,"sections":sections,"active_tab":active_tab};
+		//return {"type":"applet","data_type":"info","tabs":tabsList,"info":{"title":"📄 You don’t have any documents yet.","description":"Click here to Create.","image_url":"https://i.imgur.com/ZSIOsEj.png"},"active_tab":id};
+	}
+	i = 1;
+	for each  document in documents
+	{
+		creator_name = document.get("creator").get("name");
+		if(creator_name.length() >= 20)
+		{
+			creator_name = creator_name.subString(0,18) + "..";
+		}
+		view_people_button = {"label":creator_name,"type":"invoke.function","name":"viewpeople","id":active_tab + "|" + document.get("creator").get("id"),"emotion":"positive"};
+		elements = List();
+		elements.add({"type":"activity","title":document.get("title"),"description":"Created by " + " [View Profile]($1)","image_url":doc_image_url,"button_references":{"1":view_people_button}});
+		elements.add({"type":"buttons","buttons":{{"label":"View Comments","emotion":"negative","type":"invoke.function","name":"viewcomments","id":active_tab + "|" + document.get("comments_url") + "|1"},{"label":"View","emotion":"positive","type":"open.url","url":document.get("app_url")}}});
+		elements.add(dividerElement);
+		sections.add({"id":i,"elements":elements});
+		i = i + 1;
+		if(i == 18)
+		{
+			break;
+		}
+	}
+	page_no = page_no + 1;
+	next_documents = invokeurl
+	[
+		url :url + "?page=" + page_no
+		type :GET
+		connection:"wrike"
+	];
+	info next_documents;
+	if(next_documents.size() != 0)
+	{
+		footer = {"text":footer_text,"buttons":{{"label":"Next Page","emotion":"positive","type":"invoke.function","name":"viewcontent","id":active_tab + "|" + url + "|" + page_no}}};
+		return {"type":"applet","header":header,"footer":footer,"sections":sections,"active_tab":active_tab};
+	}
+	else
+	{
+		return {"type":"applet","header":header,"sections":sections,"active_tab":active_tab};
+	}
+}
+if(active_tab == "view_document")
+{
+	document = invokeurl
+	[
+		url :url
+		type :GET
+		connection:"wrike"
+	];
+	description = "";
+	if(document.get("content") != null)
+	{
+		description = document.get("content");
+	}
+	description = description.replaceAll("&lt;","<").replaceAll("&gt;",">").replaceAll("&amp;","&");
+	description = description.replaceAll("<br>","\n");
+	description = description.replaceAll("<[^>]*>","");
+	description = description.trim();
+	if(description.length() >= 200)
+	{
+		description = description.subString(0,198) + "..";
+	}
+	elements.add({"type":"text","text":description});
+	elements.add(dividerElement);
+	sections.add({"id":1,"elements":elements});
+	header = {"title":"view","navigation":"continue","buttons":button};
+	footer = {"text":footer_text};
+	return {"type":"applet","header":header,"footer":footer,"sections":sections,"active_tab":"Documents"};
+}
+// message button
+if(active_tab == "todos_url")
+{
+	info "active_tab : todos_url";
+	current_todo = invokeurl
+	[
+		url :current_todo_url
+		type :GET
+		connection:"wrike"
+	];
+	info current_todo;
+	todo_title = current_todo.get("title");
+	if(todo_title.length() >= 50)
+	{
+		todo_title = todo_title.subString(0,47) + "..";
+	}
+	creator_name = current_todo.get("creator").get("name");
+	if(creator_name.length() >= 20)
+	{
+		creator_name = creator_name.subString(0,18) + "..";
+	}
+	description = "";
+	if(current_todo.get("description") != null)
+	{
+		description = current_todo.get("description");
+	}
+	description = description.replaceAll("&lt;","<").replaceAll("&gt;",">").replaceAll("&amp;","&");
+	description = description.replaceAll("<br>","\n");
+	description = description.replaceAll("<[^>]*>","");
+	description = description.trim();
+	if(description.length() >= 100)
+	{
+		description = description.subString(0,98) + "..";
+	}
+	starts_on = current_todo.get("starts_on");
+	if(starts_on == null)
+	{
+		starts_on = "-";
+	}
+	starts_on = starts_on.replaceAll("T"," ").subString(0,starts_on.lastIndexOf(":"));
+	due_on = current_todo.get("due_on");
+	if(due_on == null)
+	{
+		due_on = "-";
+	}
+	due_on = due_on.replaceAll("T"," ").subString(0,due_on.lastIndexOf(":"));
+	created_at = current_todo.get("created_at");
+	if(created_at == null)
+	{
+		created_at = "-";
+	}
+	created_at = created_at.replaceAll("T"," ").subString(0,created_at.lastIndexOf(":"));
+	completed_emoji = "✖️";
+	if(current_todo.get("completed") == true)
+	{
+		completed_emoji = "✔️";
+	}
+	assignees_name = "";
+	assignees = current_todo.get("assignees");
+	info assignees;
+	for each  assignee in assignees
+	{
+		assignees_name = assignees_name + " " + assignee.get("name") + ",";
+	}
+	if(assignees_name.length() >= 1)
+	{
+		assignees_name = assignees_name.substring(0,assignees_name.length() - 1);
+	}
+	if(assignees_name.length() >= 100)
+	{
+		assignees_name = assignees_name.subString(0,98) + "..";
+	}
+	info "processed";
+	response = Map();
+	bot = Map();
+	bot.put("name","Wrike Bot");
+	bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+	response.put("bot",bot);
+	card = Map();
+	card.put("theme","modern-inline");
+	response.put("card",card);
+	slidesList = list();
+	slidesList00 = Map();
+	slidesList00.put("type","text");
+	//slidesList00.put("title",todo_title);
+	slidesList00.put("data","Description: " + description);
+	slidesList.add(slidesList00);
+	slidesList0 = Map();
+	slidesList0.put("type","table");
+	data = Map();
+	headersList = list();
+	headersList.add("Name");
+	headersList.add("Details");
+	data.put("headers",headersList);
+	rowsList = list();
+	query = Map();
+	query.put("criteria","userid=" + user.get("id"));
+	db = zoho.cliq.getRecords("wrikedb",query);
+	account_id = db.get("list").get(0).get("accountid");
+	project_url = "https://www.wrike.com/open.htm?id=" + current_todo.get("folder").get("id");
+	rowsList0 = Map();
+	rowsList0.put("Name","Project");
+	rowsList0.put("Details","[" + current_todo.get("folder").get("name") + "](" + project_url + ")");
+	rowsList.add(rowsList0);
+	rowsList1 = Map();
+	rowsList1.put("Name","To-do List");
+	rowsList1.put("Details","[" + current_todo.get("parent").get("title") + "](" + current_todo.get("parent").get("app_url") + ")");
+	rowsList.add(rowsList1);
+	rowsList2 = Map();
+	rowsList2.put("Name","Completed");
+	rowsList2.put("Details",completed_emoji);
+	rowsList.add(rowsList2);
+	rowsList3 = Map();
+	rowsList3.put("Name","Starts on");
+	rowsList3.put("Details",starts_on);
+	rowsList.add(rowsList3);
+	rowsList4 = Map();
+	rowsList4.put("Name","Due on");
+	rowsList4.put("Details",due_on);
+	rowsList.add(rowsList4);
+	rowsList5 = Map();
+	rowsList5.put("Name","Created By");
+	rowsList5.put("Details",creator_name);
+	rowsList.add(rowsList5);
+	rowsList6 = Map();
+	rowsList6.put("Name","Assignees");
+	rowsList6.put("Details",assignees_name);
+	rowsList.add(rowsList6);
+	data.put("rows",rowsList);
+	slidesList0.put("data",data);
+	//button
+	buttonsList = list();
+	buttonsList0 = Map();
+	buttonsList0.put("label","View To-do");
+	buttonsList0.put("type","+");
+	action = Map();
+	action.put("type","open.url");
+	data = Map();
+	data.put("web",current_todo.get("app_url"));
+	action.put("data",data);
+	buttonsList0.put("action",action);
+	buttonsList.add(buttonsList0);
+	slidesList0.put("buttons",buttonsList);
+	slidesList.add(slidesList0);
+	response.put("slides",slidesList);
+	response.put("text","### " + todo_title);
+	response.put("navigation","true");
+	return response;
+}
+if(active_tab == "help_next_page_1")
+{
+	response = Map();
+	card = Map();
+	card.put("theme","modern-inline");
+	response.put("card",card);
+	slidesList = list();
+	slidesList0 = Map();
+	slidesList0.put("type","text");
+	slidesList0.put("data","### To-Do List:\n*Create:*\n```/wrike Create a To-do List```\n*Visualize:* \n```/wrike View a To-do List```\n🟡 Use Wrike widgets to get all To-dos within the configured To-do list.\n---\n### To-Dos:\n*Create:*\n```/wrike Create a To-do```\n🟡 Use the __Message Card__ to create a To-do by clicking any message from Cliq, then clicking more, and selecting `Create a To-do` to create a To-do from the selected message content.\n\n*Visualize:* \n\n🟡 Use Wrike widgets to get all To-dos information, comments, etc.\n---\n### Schedule: \n*Create:*\n```/wrike Create a schedule```\n*Visualize:* \n🟡 Use Wrike widgets to get all schedule information, comments, etc.\n");
+	buttonsList = list();
+	buttonsList0 = Map();
+	buttonsList0.put("label","Next Page ➡️");
+	buttonsList0.put("type","+");
+	action = Map();
+	action.put("type","invoke.function");
+	data = Map();
+	data.put("name","viewcontent");
+	action.put("data",data);
+	buttonsList0.put("action",action);
+	buttonsList0.put("key","help_next_page_2");
+	buttonsList.add(buttonsList0);
+	slidesList0.put("buttons",buttonsList);
+	slidesList.add(slidesList0);
+	response.put("slides",slidesList);
+	response.put("text","Page 2");
+	response.put("navigation","true");
+	return response;
+}
+if(active_tab == "help_next_page_2")
+{
+	response = Map();
+	card = Map();
+	card.put("theme","modern-inline");
+	response.put("card",card);
+	slidesList = list();
+	slidesList0 = Map();
+	slidesList0.put("type","text");
+	slidesList0.put("data","### Document:\n*Create:*\n ```/wrike Create a Document```\n 🟡 Use the __Message Card__ to create a Document by clicking any message from Cliq, then clicking more, and selecting `Create a Document` to create a Document from the selected message content.\n\n*Visualize:*\n🟡 Use Wrike widgets to get all Document information, comments, links to view, etc.\n---\n### File:\n*Visualize:*\n 🟡 Use Wrike widgets to get all file information, comments, links to download, links to view, etc.");
+	buttonsList = list();
+	buttonsList0 = Map();
+	buttonsList0.put("label","Next Page ➡️");
+	buttonsList0.put("type","+");
+	action = Map();
+	action.put("type","invoke.function");
+	data = Map();
+	data.put("name","viewcontent");
+	action.put("data",data);
+	buttonsList0.put("action",action);
+	buttonsList0.put("key","help_next_page_3");
+	buttonsList.add(buttonsList0);
+	slidesList0.put("buttons",buttonsList);
+	slidesList.add(slidesList0);
+	response.put("slides",slidesList);
+	response.put("text","Page 3");
+	response.put("navigation","true");
+	return response;
+}
+if(active_tab == "help_next_page_3")
+{
+	response = Map();
+	card = Map();
+	card.put("theme","modern-inline");
+	response.put("card",card);
+	slidesList = list();
+	slidesList0 = Map();
+	slidesList0.put("type","text");
+	slidesList0.put("data","📢 *Set Up Notifications in Zoho Cliq!*\n### Use the Wrike bot to set up notifications.\n\nMap your channel to get instant notifications for all your important events. Stay informed, stay productive, and never miss a beat! 🚀\n\n🟡 Map Your Channel: Select the channel you want to receive notifications in.\n🟡 Stay Notified: Receive real-time updates on all critical events.\n🟡 Boost Productivity: Keep track of tasks and deadlines effortlessly.\n🟡 Stay notified and stay productive! 💼🔔\n\n\n### Why You Need to Use This? \n\n🟡 Save time by using Wrike from Zoho Cliq.\n🟡 Get notified within Zoho Cliq.\n🟡 Visualize data easily.\n🟡 Create instant tasks, schedules, documents, etc., from any Cliq conversation.\n\n### Common Troubleshooting: \n\nℹ️ Sometimes, you may get a \"limit reach\" message, which means the processing of calling Wrike from Cliq is overloaded and it may take a few minutes to enable back to work.");
+	slidesList.add(slidesList0);
+	response.put("slides",slidesList);
+	response.put("text","Page 4");
+	response.put("navigation","true");
+	return response;
+}
+return Map();

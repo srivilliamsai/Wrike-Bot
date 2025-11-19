@@ -1,0 +1,131 @@
+
+query = Map();
+query.put("criteria","userid=" + user.get("id"));
+db = zoho.cliq.getRecords("wrikedb",query);
+account_id = db.get("list").get(0).get("accountid");
+id = target.get("id");
+info id;
+splitIndex = id.indexOf("|");
+info splitIndex;
+active_tab = id.substring(0,splitIndex);
+info active_tab;
+id = id.substring(splitIndex + 1,id.length());
+info id;
+dividerElement = {"type":"divider"};
+people_response = invokeurl
+[
+	url :"https://www.wrike.com/api/v4/contacts/" + id
+	type :GET
+	connection:"wrike"
+];
+people_list = people_response.get("data");
+people = Map();
+if(people_list != null && people_list.size() != 0)
+{
+	people = people_list.get(0);
+}
+info people;
+sections = list();
+name = "";
+if(people.get("firstName") != null)
+{
+	name = people.get("firstName");
+}
+if(people.get("lastName") != null)
+{
+	name = (name + " " + people.get("lastName")).trim();
+}
+if(name == "")
+{
+	name = people.get("id");
+}
+if(name.length() >= 50)
+{
+	name = name.subString(0,48) + "..";
+}
+title = "";
+if(people.get("title") != null)
+{
+	title = people.get("title");
+	if(title.length() >= 50)
+	{
+		title = title.subString(0,48) + "..";
+	}
+}
+created_at = people.get("createdDate");
+if(created_at == null)
+{
+	created_at = "-";
+}
+created_at = created_at.replaceAll("T"," ").subString(0,created_at.lastIndexOf(":"));
+location = "";
+if(people.get("location") != null)
+{
+	location = people.get("location");
+}
+time_zone = "";
+if(people.get("timezone") != null)
+{
+	time_zone = people.get("timezone");
+}
+email_address = "";
+if(people.get("email") != null)
+{
+	email_address = people.get("email");
+}
+bio = "";
+if(people.get("jobRole") != null)
+{
+	bio = people.get("jobRole");
+	if(bio.length() >= 50)
+	{
+		bio = bio.subString(0,48) + "..";
+	}
+}
+is_admin = "✖️";
+if(people.get("role") == "Admin")
+{
+	is_admin = "✔️";
+}
+is_owner = "✖️";
+if(people.get("role") == "Owner")
+{
+	is_owner = "✔️";
+}
+is_client = "✖️";
+is_employee = "✖️";
+can_manage_people = "❌";
+can_manage_projects = "❌";
+can_ping = "❌";
+can_access_timesheet = "❌";
+avatar_url = "https://i.imgur.com/ZSIOsEj.png";
+if(people.get("photo") != null)
+{
+	avatar_url = people.get("photo");
+}
+elements = list();
+elements.add({"type":"activity","title":name,"image_url":avatar_url,"description":bio});
+elements.add(dividerElement);
+sections.add({"id":1,"elements":elements});
+elements1 = list();
+elements1.add({"type":"title","text":"Information 📧"});
+elements1.add({"type":"fields","data":{{"Title":title},{"Email Address":email_address}},"style":{"short":false}});
+elements1.add(dividerElement);
+sections.add({"id":2,"elements":elements1});
+elements2 = list();
+elements2.add({"type":"title","text":"User Roles and Permissions 🛡️"});
+elements2.add({"type":"fields","data":{{"is Admin":is_admin},{"is Owner":is_owner},{"is Client":is_client},{"is Employee":is_employee}},"style":{"short":false}});
+elements2.add(dividerElement);
+sections.add({"id":3,"elements":elements2});
+elements3 = list();
+elements3.add({"type":"title","text":"Management Capabilities 📋"});
+elements3.add({"type":"fields","data":{{"Can Ping":can_ping},{"Can Manage Projects":can_manage_projects},{"Can Manage People":can_manage_people},{"Can Access Timesheet":can_access_timesheet}},"style":{"short":false}});
+elements3.add(dividerElement);
+sections.add({"id":4,"elements":elements3});
+elements4 = list();
+elements4.add({"type":"title","text":"Account Details 🕒📍"});
+elements4.add({"type":"fields","data":{{"Location":location},{"Time Zone":time_zone},{"Created at":created_at}},"style":{"short":false}});
+elements4.add(dividerElement);
+sections.add({"id":5,"elements":elements4});
+header = {"title":"View People","navigation":"continue"};
+return {"type":"applet","header":header,"sections":sections,"active_tab":active_tab};

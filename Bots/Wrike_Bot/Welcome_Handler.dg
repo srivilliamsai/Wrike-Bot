@@ -1,0 +1,38 @@
+
+response = Map();
+// newuser is a boolean which defines whether the user is a first time subscriber or not!
+if(newuser)
+{
+	card = Map();
+	card.put("title","Wrike for Zoho Cliq");
+	card.put("icon","https://i.imgur.com/ZSIOsEj.png");
+	card.put("theme","modern-inline");
+	response.put("card",card);
+	slidesList = list();
+	slidesList0 = Map();
+	slidesList0.put("type","images");
+	dataList = list();
+	dataList.add("https://i.imgur.com/NPcfBax.png");
+	slidesList0.put("data",dataList);
+	slidesList.add(slidesList0);
+	response.put("slides",slidesList);
+	response.put("text","Hey *" + user.get("first_name") + "* ! Thanks for subscribing!");
+}
+else
+{
+	card = Map();
+	card.put("title","Wrike for Zoho Cliq");
+	card.put("icon","https://i.imgur.com/ZSIOsEj.png");
+	card.put("theme","modern-inline");
+	response.put("card",card);
+	slidesList = list();
+	slidesList0 = Map();
+	slidesList0.put("type","images");
+	dataList = list();
+	dataList.add("https://i.imgur.com/NPcfBax.png");
+	slidesList0.put("data",dataList);
+	slidesList.add(slidesList0);
+	response.put("slides",slidesList);
+	response.put("text","Woohoo! Glad that you subscribed back! :wink:");
+}
+return response;

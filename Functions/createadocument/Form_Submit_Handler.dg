@@ -1,0 +1,76 @@
+
+form_data = form.get("values");
+info form_data;
+vault_url = form_data.get("vault_url").get("value").replaceAll("-","/");
+project_name = form_data.get("vault_url").get("label");
+title = form_data.get("title").replaceAll("\n"," ").replaceAll("\t"," ").replaceAll("\r"," ");
+content = form_data.get("content").replaceAll("\n","<br>").replaceAll("\t"," ").replaceAll("\r"," ");
+info content;
+parameters = {"title":title,"content":content,"status":"active"};
+headers = Map();
+headers.put("Content-Type","application/json");
+vault = invokeurl
+[
+	url :vault_url
+	type :GET
+	connection:"wrike"
+];
+info vault;
+documents_url = vault.get("documents_url");
+document = invokeurl
+[
+	url :documents_url
+	type :POST
+	parameters:toString(parameters)
+	headers:headers
+	connection:"wrike"
+];
+info document;
+if(document.containskey("app_url"))
+{
+	app_url = document.get("app_url");
+	response = Map();
+	bot = Map();
+	bot.put("name","Wrike Bot");
+	bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+	response.put("bot",bot);
+	card = Map();
+	card.put("title","[Document](" + document.get("parent").get("app_url") + ")");
+	card.put("theme","modern-inline");
+	card.put("icon","https://i.imgur.com/ZSIOsEj.png");
+	card.put("thumbnail","https://i.imgur.com/ZSIOsEj.png");
+	response.put("card",card);
+	buttonsList = list();
+	buttonsList0 = Map();
+	buttonsList0.put("label","View Document");
+	buttonsList0.put("type","+");
+	action = Map();
+	action.put("type","open.url");
+	data = Map();
+	data.put("web",app_url);
+	action.put("data",data);
+	buttonsList0.put("action",action);
+	buttonsList.add(buttonsList0);
+	response.put("buttons",buttonsList);
+	query = Map();
+	query.put("criteria","userid=" + user.get("id"));
+	db = zoho.cliq.getRecords("wrikedb",query);
+	account_id = db.get("list").get(0).get("accountid");
+	project_url = "https://www.wrike.com/open.htm?id=" + document.get("folder").get("id");
+	response.put("text","Hey [" + user.get("first_name") + "](zohoid:" + user.get("zoho_user_id") + ") 👋 \nProject Name: [" + document.get("folder").get("name") + "](" + project_url + ") \n\nYou've successfully created a document");
+	return response;
+}
+else
+{
+	response = Map();
+	bot = Map();
+	bot.put("name","Wrike Bot");
+	bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+	response.put("bot",bot);
+	card = Map();
+	card.put("theme","modern-inline");
+	response.put("card",card);
+	response.put("text","⚠️ Oops! Something went wrong. 😔 Please try again later");
+	return response;
+}
+return Map();

@@ -1,0 +1,158 @@
+
+try 
+{
+	query = Map();
+	query.put("criteria","userid=" + user.get("id"));
+	db = zoho.cliq.getRecords("wrikedb",query);
+	if(db.get("status") == "SUCCESS")
+	{
+		if(db.get("list").size() == 0)
+		{
+			response = invokeurl
+			[
+				url :"https://www.wrike.com/api/v4/accounts"
+				type :GET
+				connection:"wrike"
+			];
+			info response;
+			accounts = response.get("data");
+			if(accounts == null)
+			{
+				accounts = list();
+			}
+			info accounts;
+			account_id = "";
+			account_name = "";
+			for each  account in accounts
+			{
+				account_id = account.get("id");
+				account_name = account.get("name");
+				break;
+			}
+			if(account_id == "" || account_name == "")
+			{
+				response = Map();
+				bot = Map();
+				bot.put("name","Wrike Bot");
+				bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+				response.put("bot",bot);
+				buttonsList = list();
+				buttonsList0 = Map();
+				buttonsList0.put("label","Create Account");
+				buttonsList0.put("type","+");
+				action = Map();
+				action.put("type","open.url");
+				data = Map();
+				data.put("web","https://www.wrike.com/");
+				action.put("data",data);
+				buttonsList0.put("action",action);
+				buttonsList.add(buttonsList0);
+				response.put("buttons",buttonsList);
+				response.put("text","Hey " + user.get("first_name") + " ! You don't have any Wrike account associated with your profile.");
+				return response;
+			}
+			else
+			{
+				values = Map();
+				values.put("userid",user.get("id"));
+				values.put("accountid",account_id);
+				values.put("accountname",account_name);
+				db = zoho.cliq.createRecord("wrikedb",values);
+				info db;
+			}
+		}
+	}
+	else
+	{
+		response = Map();
+		bot = Map();
+		bot.put("name","Wrike Bot");
+		bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+		response.put("bot",bot);
+		card = Map();
+		card.put("theme","modern-inline");
+		response.put("card",card);
+		response.put("text","⚠️ Oops! Something went wrong. 😔 Please try again later");
+		return response;
+	}
+	query = Map();
+	query.put("criteria","userid=" + user.get("id"));
+	db = zoho.cliq.getRecords("wrikedb",query);
+	record_id = db.get("list").get(0).get("id");
+	account_id = db.get("list").get(0).get("accountid");
+	projects = invokeurl
+	[
+		url :"https://www.wrike.com/api/v4/" + account_id + "/folders"
+		type :GET
+		connection:"wrike"
+	];
+	info projects;
+	options = List();
+	for each  project in projects
+	{
+		project_name = project.get("name");
+		if(project_name.length() >= 50)
+		{
+			project_name = project_name.subString(0,47) + "..";
+		}
+		dock = project.get("dock");
+		info dock;
+		vault_url = "";
+		for each  d in dock
+		{
+			if(d.get("name") == "vault")
+			{
+				vault_url = d.get("url");
+			}
+		}
+		option = Map();
+		option.put("value",vault_url.replaceAll("/","-"));
+		option.put("label",project_name);
+		option.put("thumbnail","https://i.imgur.com/ZSIOsEj.png");
+		options.add(option);
+	}
+	if(options.size() == 0)
+	{
+		response = Map();
+		bot = Map();
+		bot.put("name","Wrike Bot");
+		bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+		response.put("bot",bot);
+		buttonsList = list();
+		buttonsList0 = Map();
+		buttonsList0.put("label","Create Project");
+		buttonsList0.put("type","+");
+		action = Map();
+		action.put("type","open.url");
+		data = Map();
+		data.put("web","https://www.wrike.com/workspace.htm");
+		action.put("data",data);
+		buttonsList0.put("action",action);
+		buttonsList.add(buttonsList0);
+		response.put("buttons",buttonsList);
+		response.put("text","Hey " + user.get("first_name") + " ! You don't have any Project associated with your " + db.get("list").get(0).get("accountname") + " account.");
+		return response;
+	}
+	inputs = list();
+	inputs.add({"name":"vault_url","label":"Project Name","placeholder":"Choose a Project","multiple":false,"mandatory":true,"type":"dynamic_select","options":options});
+	inputs.add({"label":"Title","name":"title","placeholder":"title","mandatory":true,"type":"text","min_length":"0","max_length":"50"});
+	inputs.add({"label":"Content","name":"content","placeholder":"message","value":message.get("text"),"mandatory":true,"type":"textarea","min_length":"0","max_length":"1000"});
+	form = {"type":"form","title":"Create a Document","name":"form","version":1,"button_label":"Create","actions":{"submit":{"type":"invoke.function","name":"createadocument"}},"inputs":inputs};
+	return form;
+}
+catch (e)
+{
+	info e;
+	response = Map();
+	bot = Map();
+	bot.put("name","Wrike Bot");
+	bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+	response.put("bot",bot);
+	card = Map();
+	card.put("title","Oops! You've Hit the Fun Limit! 🎢");
+	card.put("theme","modern-inline");
+	response.put("card",card);
+	response.put("text","Looks like you've reached the maximum number of calls for now. Take a break, grab a coffee ☕, and come back later for more fun and productivity! 🚀");
+	return response;
+}
+return Map();

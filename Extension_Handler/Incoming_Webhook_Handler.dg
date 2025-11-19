@@ -1,0 +1,138 @@
+
+info user;
+info body;
+result = body.toMap();
+event_type = "";
+app_url = "";
+title = "";
+folder_name = "";
+folder_id = "";
+creator_name = "";
+avatar_url = "https://i.imgur.com/ZSIOsEj.png";
+task_id = "";
+if(result.containsKey("eventType"))
+{
+	event_type = result.get("eventType");
+}
+if(result.containsKey("taskId"))
+{
+	task_id = result.get("taskId");
+}
+if(result.containsKey("folderId"))
+{
+	folder_id = result.get("folderId");
+}
+if(result.containsKey("taskTitle"))
+{
+	title = result.get("taskTitle");
+}
+if(result.containsKey("folderTitle"))
+{
+	folder_name = result.get("folderTitle");
+}
+if(result.containsKey("permalink"))
+{
+	app_url = result.get("permalink");
+}
+if(app_url == "")
+{
+	if(task_id != "")
+	{
+		app_url = "https://www.wrike.com/open.htm?id=" + task_id;
+	}
+	else if(folder_id != "")
+	{
+		app_url = "https://www.wrike.com/open.htm?id=" + folder_id;
+	}
+}
+if(result.containsKey("authorName"))
+{
+	creator_name = result.get("authorName");
+}
+if(result.containsKey("authorAvatar"))
+{
+	avatar_url = result.get("authorAvatar");
+}
+/*
+response = Map();
+bot = Map();
+bot.put("name","Wrike Bot");
+bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+response.put("bot",bot);
+card = Map();
+//card.put("title","*🔔 Notification:* " + title);
+card.put("theme","modern-inline");
+card.put("thumbnail",avatar_url);
+response.put("card",card);
+slidesList = list();
+slidesList0 = Map();
+slidesList0.put("type","label");
+dataList = list();
+dataList00 = Map();
+dataList00.put("Title",title);
+dataList.add(dataList00);
+dataList0 = Map();
+dataList0.put("Event",kind);
+dataList.add(dataList0);
+dataList1 = Map();
+dataList1.put("Project",project_name);
+dataList.add(dataList1);
+dataList2 = Map();
+dataList2.put("Performed by",creator_name);
+dataList.add(dataList2);
+slidesList0.put("data",dataList);
+slidesList.add(slidesList0);
+response.put("slides",slidesList);
+buttonsList = list();
+buttonsList0 = Map();
+buttonsList0.put("label","View");
+buttonsList0.put("type","+");
+action = Map();
+action.put("type","open.url");
+data = Map();
+data.put("web",app_url);
+action.put("data",data);
+buttonsList0.put("action",action);
+buttonsList.add(buttonsList0);
+response.put("buttons",buttonsList);
+response.put("text","### Wrike Notification Alert 🔔 ");
+*/
+//response.put("text","\n*Event:* " + kind + "\n*Project:* " + project_name + "\n*Performed by:* " + creator_name);
+info user;
+query = Map();
+query.put("criteria","(userid==" + user.get("id") + ")&&(projectid==" + folder_id + ")");
+db = zoho.cliq.getRecords("wrikechannelmapping",query,"cliqwebhook");
+info db;
+db_list = db.get("list");
+info db_list;
+if(db_list.size() != 0)
+{
+	channeluniquename = db_list.get(0).get("channeluniquename");
+	info channeluniquename;
+	last_message_id = db_list.get(0).get("threadid");
+	info last_message_id;
+	notificationText = "### Wrike Notification Alert 🔔\n\n";
+	notificationText = notificationText + "*Folder*: " + folder_name + "\n";
+	notificationText = notificationText + "*Title*: " + title + "\n";
+	notificationText = notificationText + "*Event*: " + event_type + "\n";
+	notificationText = notificationText + "*Performed by*: " + creator_name + "\n\n";
+	notificationText = notificationText + "[*View* ➡️](" + app_url + ")";
+	parameters = Map();
+	parameters.put("text",notificationText);
+	parameters.put("thread_message_id",last_message_id);
+	headers = Map();
+	headers.put("Content-Type","application/json");
+	post_on_thread = invokeurl
+	[
+		url :"https://cliq.zoho.com/api/v2/channelsbyname/" + channeluniquename + "/message?bot_unique_name=wrikebot"
+		type :POST
+		parameters:parameters + ""
+		headers:headers
+		connection:"cliqwebhook"
+	];
+	info post_on_thread;
+	//post_to_bot = zoho.cliq.postToBot("wrikebot",response,"cliqwebhook");
+	//post_to_channel = zoho.cliq.postToChannel(channeluniquename,response,"cliqwebhook");
+	//info post_to_channel;
+}
+return Map();

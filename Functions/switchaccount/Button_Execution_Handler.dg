@@ -1,0 +1,115 @@
+
+try 
+{
+response = invokeurl
+[
+	url :"https://www.wrike.com/api/v4/accounts"
+	type :GET
+	connection:"wrike"
+];
+info response;
+accounts = response.get("data");
+if(accounts == null)
+{
+	accounts = list();
+}
+info accounts;
+	query = Map();
+	query.put("criteria","userid=" + user.get("id"));
+	db = zoho.cliq.getRecords("wrikedb",query);
+	if(db.get("status") == "SUCCESS")
+	{
+		if(db.get("list").size() == 0)
+		{
+			account_id = "";
+			account_name = "";
+			for each  account in accounts
+			{
+				account_id = account.get("id");
+				account_name = account.get("name");
+				info "default : " + account_name;
+				break;
+			}
+			if(account_id == "" || account_name == "")
+			{
+				response = Map();
+				bot = Map();
+				bot.put("name","Wrike Bot");
+				bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+				response.put("bot",bot);
+				buttonsList = list();
+				buttonsList0 = Map();
+				buttonsList0.put("label","Create Account");
+				buttonsList0.put("type","+");
+				action = Map();
+				action.put("type","open.url");
+				data = Map();
+				data.put("web","https://www.wrike.com/");
+				action.put("data",data);
+				buttonsList0.put("action",action);
+				buttonsList.add(buttonsList0);
+				response.put("buttons",buttonsList);
+				response.put("text","Hey " + user.get("first_name") + " ! You don't have any Wrike account associated with your profile.");
+				return response;
+			}
+			else
+			{
+				values = Map();
+				values.put("userid",user.get("id"));
+				values.put("accountid",account_id);
+				values.put("accountname",account_name);
+				db = zoho.cliq.createRecord("wrikedb",values);
+				info db;
+			}
+		}
+		options = List();
+		for each  account in accounts
+		{
+			account_id = account.get("id");
+			account_name = account.get("name");
+			if(account_name.length() >= 50)
+			{
+				account_name = account_name.subString(0,47) + "..";
+			}
+			option = Map();
+			option.put("value",account_id);
+			option.put("label",account_name);
+			option.put("thumbnail","https://i.imgur.com/ZSIOsEj.png");
+			options.add(option);
+		}
+		info options;
+		inputs = list();
+		inputs.add({"name":"account_id","label":"Account Name","placeholder":"Choose  Account","multiple":false,"mandatory":true,"type":"dynamic_select","options":options});
+		form = {"type":"form","title":"Switch Wrike Account","name":"form","version":1,"button_label":"Switch 🔗","actions":{"submit":{"type":"invoke.function","name":"connect"}},"inputs":inputs};
+		return form;
+	}
+	else
+	{
+		response = Map();
+		bot = Map();
+		bot.put("name","Wrike Bot");
+		bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+		response.put("bot",bot);
+		card = Map();
+		card.put("theme","modern-inline");
+		response.put("card",card);
+		response.put("text","⚠️ Oops! Something went wrong. 😔 Please try again later");
+		return response;
+	}
+}
+catch (e)
+{
+	info e;
+	response = Map();
+	bot = Map();
+	bot.put("name","Wrike Bot");
+	bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+	response.put("bot",bot);
+	card = Map();
+	card.put("title","Oops! You've Hit the Fun Limit! 🎢");
+	card.put("theme","modern-inline");
+	response.put("card",card);
+	response.put("text","Looks like you've reached the maximum number of calls for now. Take a break, grab a coffee ☕, and come back later for more fun and productivity! 🚀");
+	return response;
+}
+return Map();

@@ -1,0 +1,26 @@
+
+response = Map();
+form_data = form.get("values");
+info form_data;
+id = form_data.get("id");
+comment = form_data.get("comment").replaceAll("\n","<br>").replaceAll("\t"," ").replaceAll("\r"," ");
+info id;
+splitIndex = id.indexOf("|");
+active_tab = id.substring(0,splitIndex);
+info active_tab;
+url = id.substring(splitIndex + 1,id.length());
+info url;
+parameters = Map();
+parameters.put("content",comment);
+headers = Map();
+headers.put("Content-Type","application/json");
+comment = invokeurl
+[
+	url :url
+	type :POST
+	parameters:toString(parameters)
+	headers:headers
+	connection:"wrike"
+];
+info comment;
+return Map();

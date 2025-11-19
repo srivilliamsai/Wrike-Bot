@@ -1,0 +1,83 @@
+
+actions = list();
+response = Map();
+if(target.get("name").containsIgnoreCase("todolists_url"))
+{
+	todolists_url = form.get("values").get("todolists_url").get("value").replaceAll("-","/");
+	is_message_action = form.get("values").get("is_message_action");
+	info is_message_action;
+	todolists = invokeurl
+	[
+		url :todolists_url
+		type :GET
+		connection:"wrike"
+	];
+	info todolists;
+	options = List();
+	for each  todolist in todolists
+	{
+		name = todolist.get("name");
+		if(name.length() >= 50)
+		{
+			name = name.subString(0,47) + "..";
+		}
+		todos_url = todolist.get("todos_url");
+		option = {"label":name,"value":todos_url.replaceAll("/","-")};
+		options.add(option);
+	}
+	info options;
+	query = Map();
+	query.put("criteria","userid=" + user.get("id"));
+	db = zoho.cliq.getRecords("wrikedb",query);
+	account_id = db.get("list").get(0).get("accountid");
+	peoples_response = invokeurl
+	[
+		url :"https://www.wrike.com/api/v4/contacts?accountId=" + account_id
+		type :GET
+		connection:"wrike"
+	];
+	peoples = peoples_response.get("data");
+	if(peoples == null)
+	{
+		peoples = list();
+	}
+	info peoples;
+	people_options = List();
+	for each  people in peoples
+	{
+		if(people.get("type") == "Person")
+		{
+			people_name = "";
+			if(people.get("firstName") != null)
+			{
+				people_name = people.get("firstName");
+			}
+			if(people.get("lastName") != null)
+			{
+				people_name = (people_name + " " + people.get("lastName")).trim();
+			}
+			if(people_name == "")
+			{
+				people_name = people.get("id");
+			}
+			if(people_name.length() >= 50)
+			{
+				people_name = people_name.subString(0,47) + "..";
+			}
+			people_id = people.get("id");
+			people_option = {"label":people_name,"value":people_id};
+			people_options.add(people_option);
+		}
+	}
+	info people_options;
+	actions.add({"type":"add_after","name":"todolists_url","input":{"label":"Due on","name":"due_on","placeholder":"Due on","mandatory":false,"type":"date"}});
+	actions.add({"type":"add_after","name":"todolists_url","input":{"type":"dynamic_select","name":"assignees","placeholder":"Select People","label":"Assign To","mandatory":false,"multiple":true,"options":people_options}});
+	if(is_message_action != "true")
+	{
+		actions.add({"type":"add_after","name":"todolists_url","input":{"label":"Description","name":"description","placeholder":"Add extra details","min_length":"0","max_length":"100","mandatory":false,"type":"textarea"}});
+	}
+	actions.add({"type":"add_after","name":"todolists_url","input":{"label":"Name","name":"name","placeholder":"To-do Name","min_length":"0","max_length":"50","mandatory":true,"type":"text"}});
+	actions.add({"type":"add_after","name":"todolists_url","input":{"type":"dynamic_select","name":"todos_url","label":"To-do List","placeholder":"Choose a task To-do List","mandatory":true,"options":options}});
+	return {"type":"form_modification","actions":actions};
+}
+return Map();

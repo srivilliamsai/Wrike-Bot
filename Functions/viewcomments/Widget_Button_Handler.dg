@@ -1,0 +1,100 @@
+
+query = Map();
+query.put("criteria","userid=" + user.get("id"));
+db = zoho.cliq.getRecords("wrikedb",query);
+account_id = db.get("list").get(0).get("accountid");
+id = target.get("id");
+info id;
+splitIndex = id.indexOf("|");
+splitLastIndex = id.lastIndexOf("|");
+active_tab = id.substring(0,splitIndex);
+info active_tab;
+url = id.substring(splitIndex + 1,splitLastIndex);
+info url;
+page_no = id.substring(splitLastIndex + 1,id.length()).toNumber();
+info page_no;
+dividerElement = {"type":"divider"};
+add_comment_button = {"label":"Add Comment","emotion":"positive","type":"invoke.function","name":"addcommentform","id":active_tab + "|" + url};
+button = List();
+button.add(add_comment_button);
+button.add({"label":"Edit Default Project","emotion":"positive","type":"invoke.function","name":"configureprojectform","id":2});
+header = {"title":"View Comments (Page " + page_no + ")","navigation":"continue","buttons":button};
+comments = invokeurl
+[
+	url :url + "?page=" + page_no
+	type :GET
+	connection:"wrike"
+];
+info comments;
+if(comments.size() == 0)
+{
+	sections = list();
+	elements = List();
+	elements.add({"type":"activity","title":"There are no more comments to show.","description":"","image_url":"https://i.imgur.com/ZSIOsEj.png"});
+	elements.add({"type":"buttons","buttons":{add_comment_button}});
+	elements.add(dividerElement);
+	sections.add({"id":1,"elements":elements});
+	return {"type":"applet","header":header,"sections":sections,"active_tab":active_tab};
+	//return {"type":"applet","data_type":"info","info":{"title":"","description":"Click here to Add Comment.","image_url":"https://i.imgur.com/ZSIOsEj.png","button":add_comment_button},"active_tab":active_tab};
+}
+re_title = comments.get(0).get("title");
+if(re_title.length() >= 50)
+{
+	re_title = re_title.subString(0,48) + "..";
+}
+sections = list();
+elements = List();
+elements.add({"type":"title","text":re_title});
+elements.add(dividerElement);
+sections.add({"id":1,"elements":elements});
+i = 2;
+for each  comment in comments
+{
+	content = "";
+	if(comment.get("content") != null)
+	{
+		content = comment.get("content");
+	}
+	content = content.replaceAll("&lt;","<").replaceAll("&gt;",">").replaceAll("&amp;","&");
+	content = content.replaceAll("<br>","\n");
+	content = content.replaceAll("<[^>]*>","");
+	content = content.trim();
+	if(content.length() >= 200)
+	{
+		content = content.subString(0,198) + "..";
+	}
+	info content;
+	creator_id = comment.get("creator").get("id");
+	creator_name = comment.get("creator").get("name");
+	if(creator_name.length() >= 20)
+	{
+		creator_name = creator_name.subString(0,18) + "..";
+	}
+	view_people_button = {"label":"View Profile","type":"invoke.function","name":"viewpeople","id":active_tab + "|" + comment.get("creator").get("id"),"emotion":"positive"};
+	elements = List();
+	elements.add({"type":"activity","title":creator_name,"description":content + " \n [View Profile]($1)","image_url":comment.get("creator").get("avatar_url"),"button_references":{"1":view_people_button}});
+	elements.add(dividerElement);
+	sections.add({"id":i,"elements":elements});
+	i = i + 1;
+	if(i == 18)
+	{
+		break;
+	}
+}
+page_no = page_no + 1;
+next_comments = invokeurl
+[
+	url :url + "?page=" + page_no
+	type :GET
+	connection:"wrike"
+];
+info next_comments;
+if(next_comments.size() != 0)
+{
+	footer = {"text":"","buttons":{{"label":"Next Page","emotion":"positive","type":"invoke.function","name":"viewcomments","id":active_tab + "|" + url + "|" + page_no}}};
+	return {"type":"applet","header":header,"footer":footer,"sections":sections,"active_tab":active_tab};
+}
+else
+{
+	return {"type":"applet","header":header,"sections":sections,"active_tab":active_tab};
+}

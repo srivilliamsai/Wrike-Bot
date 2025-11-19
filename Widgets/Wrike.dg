@@ -1,0 +1,852 @@
+
+try 
+{
+	query = Map();
+	query.put("criteria","userid=" + user.get("id"));
+	db = zoho.cliq.getRecords("wrikedb",query);
+	// confiure default account
+	if(db.get("list").size() == 0)
+	{
+		response = invokeurl
+		[
+			url :"https://www.wrike.com/api/v4/accounts"
+			type :GET
+			connection:"wrike"
+		];
+		accounts = response.get("data");
+		if(accounts == null)
+		{
+			accounts = list();
+		}
+		for each  account in accounts
+		{
+			account_id = account.get("id");
+			account_name = account.get("name");
+			values = Map();
+			values.put("userid",user.get("id"));
+			values.put("accountid",account_id);
+			values.put("accountname",account_name);
+			db = zoho.cliq.createRecord("wrikedb",values);
+			info db;
+			break;
+		}
+	}
+	// confiure default project
+	db = zoho.cliq.getRecords("wrikedb",query);
+	if(db.get("list").get(0).get("projectid") == 0)
+	{
+		record_id = db.get("list").get(0).get("id");
+		account_id = db.get("list").get(0).get("accountid");
+		projects = invokeurl
+		[
+			url :"https://www.wrike.com/api/v4/accounts/" + account_id + "/folders"
+			type :GET
+			connection:"wrike"
+		];
+		project_list = projects.get("data");
+		if(project_list == null)
+		{
+			project_list = list();
+		}
+		for each  project in project_list
+		{
+			project_id = project.get("id");
+			values = Map();
+			values.put("projectid",project_id);
+			db = zoho.cliq.updateRecord("wrikedb",record_id,values);
+			info db;
+			break;
+		}
+	}
+	// confiure default to-do list
+	db = zoho.cliq.getRecords("wrikedb",query);
+	if(db.get("list").get(0).get("projectid") != 0 && db.get("list").get(0).get("todolistid") == 0)
+	{
+		record_id = db.get("list").get(0).get("id");
+		account_id = db.get("list").get(0).get("accountid");
+		project_id = db.get("list").get(0).get("projectid");
+		project = invokeurl
+		[
+			url :"https://www.wrike.com/api/v4/" + account_id + "/folders/" + project_id + ""
+			type :GET
+			connection:"wrike"
+		];
+		dock = project.get("dock");
+		info dock;
+		todosets_url = "";
+		for each  d in dock
+		{
+			if(d.get("name") == "todoset")
+			{
+				todosets_url = d.get("url");
+				break;
+			}
+		}
+		todosets = invokeurl
+		[
+			url :todosets_url
+			type :GET
+			connection:"wrike"
+		];
+		info todosets;
+		todolists_url = todosets.get("todolists_url");
+		todolists = invokeurl
+		[
+			url :todolists_url
+			type :GET
+			connection:"wrike"
+		];
+		info todolists;
+		options = List();
+		for each  todolist in todolists
+		{
+			name = todolist.get("name");
+			todolist_id = todolist.get("id");
+			values = Map();
+			values.put("todolistid",todolist_id);
+			db = zoho.cliq.updateRecord("wrikedb",record_id,values);
+			info db;
+			break;
+		}
+	}
+	id = "Project";
+	if(target.containKey("id"))
+	{
+		id = target.get("id");
+	}
+	header = Map();
+	footer = Map();
+	elements = list();
+	sections = list();
+	header = {"title":"Wrike"};
+	dividerElement = {"type":"divider"};
+	footer = {"text":""};
+	footer_text = "";
+	editDefaultProject = {"label":"Edit Default Project","emotion":"positive","type":"invoke.function","name":"configureprojectform","id":id};
+	tabsList = {{"label":"Project","id":"Project"},{"label":"To-dos","id":"To-dos"},{"label":"Schedule","id":"Schedule"},{"label":"Files","id":"Files"},{"label":"Documents","id":"Documents"}};
+	//query = Map();
+	//query.put("criteria","userid=" + user.get("id"));
+	db = zoho.cliq.getRecords("wrikedb",query);
+	if(db.get("status") == "SUCCESS" && db.get("list").size() != 0)
+	{
+		account_id = db.get("list").get(0).get("accountid");
+		project_id = db.get("list").get(0).get("projectid");
+		if(project_id != 0)
+		{
+			if(id == "Project")
+			{
+				// project tab 1
+				project = invokeurl
+				[
+					url :"https://www.wrike.com/api/v4/" + account_id + "/folders/" + project_id + ""
+					type :GET
+					connection:"wrike"
+				];
+				info project;
+				project_name = project.get("name");
+				if(project_name.length() >= 50)
+				{
+					project_name = project_name.subString(0,47) + "..";
+				}
+				project_description = project.get("description");
+				if(project_description.length() >= 50)
+				{
+					project_description = project_description.subString(0,47) + "..";
+				}
+				project_status = project.get("status");
+				project_status_emoji = "🟢";
+				if(project_status != "active")
+				{
+					project_status_emoji = "🔴";
+				}
+				project_clients_enabled = project.get("clients_enabled");
+				project_clients_enabled_emoji = "✔️";
+				if(project_clients_enabled != true)
+				{
+					project_clients_enabled_emoji = "✖️";
+				}
+				project_timesheet_enabled = project.get("timesheet_enabled");
+				project_timesheet_enabled_emoji = "✔️";
+				if(project_timesheet_enabled != true)
+				{
+					project_timesheet_enabled_emoji = "✖️";
+				}
+				project_created_at = project.get("created_at");
+				project_app_url = project.get("app_url");
+				project_last_needle_position = project.get("last_needle_position");
+				if(project_last_needle_position == null)
+				{
+					project_last_needle_position = 0;
+				}
+				created_at = project.get("created_at");
+				if(created_at == null)
+				{
+					created_at = "-";
+				}
+				created_at = created_at.replaceAll("T"," ").subString(0,created_at.lastIndexOf(":"));
+				project_last_needle_color = project.get("last_needle_color");
+				Needle_info = {"green":"On track","yellow":"Some risk","red":"Concerned"};
+				Needle_data = {{"label":"Completed","value":project_last_needle_position},{"label":"Pending","value":100 - project_last_needle_position}};
+				sections = list();
+				elements1 = list();
+				elements1.add({"type":"percentage_chart","styles":{"preview":"semi_doughnut"},"data":Needle_data});
+				sections.add({"id":1,"elements":elements1});
+				elements2 = list();
+				elements2.add({"type":"fields","data":{{"Status":project_status_emoji + " " + project_status},{"Needle Status":Needle_info.get(project_last_needle_color)},{"Clients Enabled":project_clients_enabled_emoji},{"Project Description":project_description},{"Timesheet Enabled":project_timesheet_enabled_emoji},{"Created at":created_at}},"style":{"short":false}});
+				elements2.add(dividerElement);
+				sections.add({"id":2,"elements":elements2});
+				elements3 = list();
+				docks = project.get("dock");
+				for each  dock in docks
+				{
+					if(dock.get("name") == "todoset")
+					{
+						todoset_url = dock.get("url");
+						break;
+					}
+				}
+				todoset = invokeurl
+				[
+					url :todoset_url
+					type :GET
+					connection:"wrike"
+				];
+				info todoset;
+				completed_ratio = todoset.get("completed_ratio");
+				info completed_ratio;
+				splitIndex = completed_ratio.indexOf("/");
+				num = completed_ratio.subString(0,splitIndex).toNumber();
+				den = completed_ratio.subString(splitIndex + 1,completed_ratio.length()).toNumber();
+				if(num == 0 || den == 0)
+				{
+					todoset_ratio = 0;
+				}
+				else
+				{
+					todoset_ratio = (num * 100) / den;
+				}
+				todoset_data = {{"label":"Completed","value":todoset_ratio},{"label":"Pending","value":100 - todoset_ratio}};
+				elements3.add({"type":"text","text":"To-do Accomplishment Ratio"});
+				elements3.add({"type":"percentage_chart","styles":{"preview":"semi_doughnut"},"data":todoset_data});
+				elements3.add(dividerElement);
+				sections.add({"id":3,"elements":elements3});
+				peoples = invokeurl
+				[
+					url :"https://www.wrike.com/api/v4/contacts?folderId=" + project_id
+					type :GET
+					connection:"wrike"
+				];
+				info peoples;
+				dataList = list();
+				people_count = 1;
+				for each  people in peoples
+				{
+					eachData = Map();
+					eachData.put("title",people.get("name"));
+					eachData.put("description",people.get("email_address"));
+					eachData.put("image_url",people.get("avatar_url"));
+					eachData.put("icon_url",people.get("avatar_url"));
+					buttonList = {{"label":"View Details","type":"invoke.function","name":"viewpeople","id":id + "|" + people.get("id"),"emotion":"positive"}};
+					eachData.put("buttons",buttonList);
+					dataList.add(eachData);
+					if(people_count == 24)
+					{
+						break;
+					}
+					people_count = people_count + 1;
+				}
+				if(dataList.size() >= 1)
+				{
+					elements4 = list();
+					elements4.add({"type":"title","text":"Active People on this Project"});
+					elements4.add({"type":"cards","data":dataList,"style":{"view":"gallery","size":"small"}});
+					elements4.add(dividerElement);
+					sections.add({"id":4,"elements":elements4});
+				}
+				button = List();
+				button.add(editDefaultProject);
+				button.add({"label":"View","type":"open.url","url":project_app_url});
+				header = {"title":project_name,"navigation":"new","buttons":button};
+				return {"type":"applet","header":header,"sections":sections,"tabs":tabsList,"active_tab":id};
+			}
+			else if(id == "To-dos")
+			{
+				todolist_id = db.get("list").get(0).get("todolistid");
+				if(todolist_id != 0)
+				{
+					button = List();
+					button.add(editDefaultProject);
+					button.add({"label":"Edit Default To-do List","type":"invoke.function","name":"configuretodolistform","emotion":"positive","id":"configuration"});
+					header = {"title":"To-dos (page 1)","navigation":"new","buttons":button};
+					todos_url = "https://www.wrike.com/api/v4/" + account_id + "/folders/" + project_id + "/folders/" + todolist_id + "/tasks";
+					todos = invokeurl
+					[
+						url :todos_url
+						type :GET
+						connection:"wrike"
+					];
+					info todos;
+					if(todos.size() == 0)
+					{
+						sections = List();
+						elements = List();
+						elements.add({"type":"activity","title":"To-do List Empty! 📝","description":"You don't have any To-dos yet!\nUse `/wrike Create a To-do` in any Cliq chat or use the message action (select a message, click more, and then click `Create a To-do`) to create your first task and start organizing your day! 📅💪","image_url":"https://i.imgur.com/ZSIOsEj.png"});
+						elements.add(dividerElement);
+						sections.add({"id":1,"elements":elements});
+						return {"type":"applet","header":header,"footer":footer,"sections":sections,"tabs":tabsList,"active_tab":id};
+						//return {"type":"applet","data_type":"info","tabs":tabsList,"info":{"title":" You don’t have any todos yet.","description":"Click here to Create.","image_url":"https://i.imgur.com/ZSIOsEj.png"},"active_tab":id};
+					}
+					current_todo = todos.get(0);
+					sections = List();
+					elements = List();
+					todo_title = current_todo.get("title");
+					if(todo_title.length() >= 50)
+					{
+						todo_title = todo_title.subString(0,47) + "..";
+					}
+					creator_name = current_todo.get("creator").get("name");
+					if(creator_name.length() >= 20)
+					{
+						creator_name = creator_name.subString(0,18) + "..";
+					}
+					description = "";
+					if(current_todo.get("description") != null)
+					{
+						description = current_todo.get("description");
+					}
+					description = description.replaceAll("&lt;","<").replaceAll("&gt;",">").replaceAll("&amp;","&");
+					description = description.replaceAll("<br>","\n");
+					description = description.replaceAll("<[^>]*>","");
+					description = description.trim();
+					if(description.length() >= 200)
+					{
+						description = description.subString(0,198) + "..";
+					}
+					starts_on = current_todo.get("starts_on");
+					if(starts_on == null)
+					{
+						starts_on = "-";
+					}
+					starts_on = starts_on.replaceAll("T"," ").subString(0,starts_on.lastIndexOf(":"));
+					due_on = current_todo.get("due_on");
+					if(due_on == null)
+					{
+						due_on = "-";
+					}
+					due_on = due_on.replaceAll("T"," ").subString(0,due_on.lastIndexOf(":"));
+					created_at = current_todo.get("created_at");
+					if(created_at == null)
+					{
+						created_at = "-";
+					}
+					created_at = created_at.replaceAll("T"," ").subString(0,created_at.lastIndexOf(":"));
+					completed_emoji = "✖️";
+					if(current_todo.get("completed") == true)
+					{
+						completed_emoji = "✔️";
+					}
+					elements.add({"type":"title","text":todo_title});
+					elements.add({"type":"text","text":description});
+					elements.add({"type":"buttons","buttons":{{"label":"View Comments","emotion":"negative","type":"invoke.function","name":"viewcomments","id":id + "|" + current_todo.get("comments_url") + "|1"},{"label":"View","emotion":"positive","type":"open.url","url":current_todo.get("app_url")}}});
+					elements.add(dividerElement);
+					assignees_name = "";
+					assignees = current_todo.get("assignees");
+					info assignees;
+					for each  assignee in assignees
+					{
+						assignees_name = assignees_name + " " + assignee.get("name") + ",";
+					}
+					if(assignees_name.length() >= 1)
+					{
+						assignees_name = assignees_name.substring(0,assignees_name.length() - 1);
+					}
+					elements.add({"type":"fields","data":{{"Completed":completed_emoji},{"Starts on":starts_on},{"Due on":due_on},{"Assignees":assignees_name}},"style":{"short":false}});
+					view_people_button = {"label":creator_name,"type":"invoke.function","name":"viewpeople","id":id + "|" + current_todo.get("creator").get("id"),"emotion":"positive"};
+					elements.add({"type":"text","text":"Created by " + " [View Profile]($1) " + " on " + created_at,"button_references":{"1":view_people_button}});
+					elements.add(dividerElement);
+					sections.add({"id":1,"elements":elements});
+					i = 0;
+					dataList = list();
+					for each  todo in todos
+					{
+						i = i + 1;
+						if(i == 1)
+						{
+							// skip current_entry
+							continue;
+						}
+						title = todo.get("title");
+						if(title.length() >= 50)
+						{
+							title = todo.subString(0,47) + "..";
+						}
+						description = "";
+						if(todo.get("description") != null)
+						{
+							description = todo.get("description");
+						}
+						description = description.replaceAll("&lt;","<").replaceAll("&gt;",">").replaceAll("&amp;","&");
+						description = description.replaceAll("<br>","\n");
+						description = description.replaceAll("<[^>]*>","");
+						description = description.trim();
+						if(description.length() >= 200)
+						{
+							description = description.subString(0,198) + "..";
+						}
+						eachData = Map();
+						eachData.put("title",title);
+						eachData.put("description",description);
+						eachData.put("image_url","https://i.imgur.com/McUuEPk.png");
+						eachData.put("icon_url","https://i.imgur.com/ZSIOsEj.png");
+						buttonList = {{"label":"Open","type":"invoke.function","name":"viewtodos","id":todo.get("url") + "|" + todos_url + "|1","emotion":"negative"}};
+						eachData.put("buttons",buttonList);
+						dataList.add(eachData);
+						if(i == 15)
+						{
+							break;
+						}
+					}
+					if(dataList.size() != 0)
+					{
+						elements = list();
+						elements.add({"type":"title","text":"Other To-dos"});
+						elements.add({"type":"cards","data":dataList,"style":{"view":"gallery","size":"small"}});
+						elements.add({"type":"divider"});
+						sections.add({"id":2,"elements":elements});
+					}
+					next_todos = invokeurl
+					[
+						url :todos_url + "?page=2"
+						type :GET
+						connection:"wrike"
+					];
+					info next_todos;
+					if(next_todos.size() != 0)
+					{
+						footer = {"text":footer_text,"buttons":{{"label":"Next Page","emotion":"positive","type":"invoke.function","name":"viewtodos","id":"next_page" + "|" + todos_url + "|2"}}};
+						return {"type":"applet","header":header,"footer":footer,"sections":sections,"tabs":tabsList,"active_tab":id};
+					}
+					else
+					{
+						// no footer
+						return {"type":"applet","header":header,"sections":sections,"tabs":tabsList,"active_tab":id};
+					}
+				}
+				return {"type":"applet","data_type":"info","tabs":tabsList,"info":{"title":"Your default To-do List is not configured yet!","description":"Click here to configure.","image_url":"https://i.imgur.com/ZSIOsEj.png","button":{"label":"Configure Default To-do List","type":"invoke.function","name":"configuretodolistform","emotion":"positive","id":"configuration"}},"active_tab":id};
+			}
+			else if(id == "Schedule")
+			{
+				// project tab 4
+				button = List();
+				button.add(editDefaultProject);
+				header = {"title":"Schedule (page 1)","navigation":"new","buttons":button};
+				file_image_url = "https://i.imgur.com/2VA4szx.png";
+				project = invokeurl
+				[
+					url :"https://www.wrike.com/api/v4/" + account_id + "/folders/" + project_id + ""
+					type :GET
+					connection:"wrike"
+				];
+				info project;
+				dock = project.get("dock");
+				info dock;
+				schedule_url = "";
+				for each  d in dock
+				{
+					if(d.get("name") == "schedule")
+					{
+						schedule_url = d.get("url");
+						break;
+					}
+				}
+				project_name = project.get("name");
+				if(project_name.length() >= 50)
+				{
+					project_name = project_name.subString(0,47) + "..";
+				}
+				schedule = invokeurl
+				[
+					url :schedule_url
+					type :GET
+					connection:"wrike"
+				];
+				info schedule;
+				entries_url = schedule.get("entries_url");
+				entries_count = schedule.get("entries_count");
+				if(entries_count == 0)
+				{
+					sections = List();
+					elements = List();
+					elements.add({"type":"activity","title":"You don't have any schedules yet! 🤔","description":"Use `/wrike Create a Schedule` in any Cliq chat to create your first schedule and start organizing your day! 📅💪","image_url":"https://i.imgur.com/ZSIOsEj.png"});
+					elements.add(dividerElement);
+					sections.add({"id":1,"elements":elements});
+					return {"type":"applet","header":header,"footer":footer,"sections":sections,"tabs":tabsList,"active_tab":id};
+					//return {"type":"applet","data_type":"info","tabs":tabsList,"info":{"title":" You don’t have any schedule yet.","description":"Click here to Create.","image_url":"https://i.imgur.com/ZSIOsEj.png"},"active_tab":id};
+				}
+				entries = invokeurl
+				[
+					url :entries_url
+					type :GET
+					connection:"wrike"
+				];
+				info entries;
+				current_entry = entries.get(0);
+				sections = List();
+				elements = List();
+				entry_summary = current_entry.get("summary");
+				if(entry_summary.length() >= 50)
+				{
+					entry_summary = entry_summary.subString(0,47) + "..";
+				}
+				creator_name = current_entry.get("creator").get("name");
+				if(creator_name.length() >= 20)
+				{
+					creator_name = creator_name.subString(0,18) + "..";
+				}
+				description = "";
+				if(current_entry.get("description") != null)
+				{
+					description = current_entry.get("description");
+				}
+				description = description.replaceAll("&lt;","<").replaceAll("&gt;",">").replaceAll("&amp;","&");
+				description = description.replaceAll("<br>","\n");
+				description = description.replaceAll("<[^>]*>","");
+				description = description.trim();
+				if(description.length() >= 200)
+				{
+					description = description.subString(0,198) + "..";
+				}
+				all_day = current_entry.get("all_day");
+				starts_at = current_entry.get("starts_at");
+				if(starts_at == null)
+				{
+					starts_at = "-";
+				}
+				starts_at = starts_at.replaceAll("T"," ").subString(0,starts_at.lastIndexOf(":"));
+				ends_at = current_entry.get("ends_at");
+				if(ends_at == null)
+				{
+					ends_at = "-";
+				}
+				ends_at = ends_at.replaceAll("T"," ").subString(0,ends_at.lastIndexOf(":"));
+				created_at = current_entry.get("created_at");
+				if(created_at == null)
+				{
+					created_at = "-";
+				}
+				created_at = created_at.replaceAll("T"," ").subString(0,created_at.lastIndexOf(":"));
+				all_day_emoji = "✖️";
+				if(all_day == true)
+				{
+					all_day_emoji = "✔️";
+				}
+				elements.add({"type":"title","text":entry_summary});
+				elements.add({"type":"text","text":description});
+				elements.add({"type":"buttons","buttons":{{"label":"View Comments","emotion":"negative","type":"invoke.function","name":"viewcomments","id":id + "|" + current_entry.get("comments_url") + "|1"},{"label":"View","emotion":"positive","type":"open.url","url":current_entry.get("app_url")}}});
+				elements.add(dividerElement);
+				participants_name = "";
+				participants = current_entry.get("participants");
+				for each  participant in participants
+				{
+					participants_name = participants_name + " " + participant.get("name") + ",";
+				}
+				if(participants_name.length() >= 1)
+				{
+					participants_name = participants_name.substring(0,participants_name.length() - 1);
+				}
+				elements.add({"type":"fields","data":{{"All Day":all_day_emoji},{"Starts at":starts_at},{"Ends at":ends_at},{"Participants":participants_name}},"style":{"short":false}});
+				view_people_button = {"label":creator_name,"type":"invoke.function","name":"viewpeople","id":id + "|" + current_entry.get("creator").get("id"),"emotion":"positive"};
+				elements.add({"type":"text","text":"Created by " + " [View Profile]($1) " + " on " + created_at,"button_references":{"1":view_people_button}});
+				elements.add(dividerElement);
+				sections.add({"id":1,"elements":elements});
+				i = 0;
+				dataList = list();
+				for each  entry in entries
+				{
+					i = i + 1;
+					if(i == 1)
+					{
+						// skip current_entry
+						continue;
+					}
+					summary = entry.get("summary");
+					if(summary.length() >= 50)
+					{
+						summary = entry.subString(0,47) + "..";
+					}
+					description = "";
+					if(entry.get("description") != null)
+					{
+						description = entry.get("description");
+					}
+					description = description.replaceAll("&lt;","<").replaceAll("&gt;",">").replaceAll("&amp;","&");
+					description = description.replaceAll("<br>","\n");
+					description = description.replaceAll("<[^>]*>","");
+					description = description.trim();
+					if(description.length() >= 200)
+					{
+						description = description.subString(0,198) + "..";
+					}
+					eachData = Map();
+					eachData.put("title",summary);
+					eachData.put("description",description);
+					eachData.put("image_url","https://i.imgur.com/N6c9bLZ.png");
+					eachData.put("icon_url","https://i.imgur.com/ZSIOsEj.png");
+					buttonList = {{"label":"Open","type":"invoke.function","name":"viewschedule","id":entry.get("url") + "|" + entries_url + "|1","emotion":"negative"}};
+					eachData.put("buttons",buttonList);
+					dataList.add(eachData);
+					if(i == 15)
+					{
+						break;
+					}
+				}
+				if(dataList.size() != 0)
+				{
+					elements = list();
+					elements.add({"type":"title","text":"Other Schedule"});
+					elements.add({"type":"cards","data":dataList,"style":{"view":"gallery","size":"small"}});
+					elements.add({"type":"divider"});
+					sections.add({"id":2,"elements":elements});
+				}
+				next_entries = invokeurl
+				[
+					url :entries_url + "?page=2"
+					type :GET
+					connection:"wrike"
+				];
+				info next_entries;
+				if(next_entries.size() != 0)
+				{
+					footer = {"text":footer_text,"buttons":{{"label":"Next Page","emotion":"positive","type":"invoke.function","name":"viewschedule","id":"next_page" + "|" + entries_url + "|2"}}};
+					return {"type":"applet","header":header,"footer":footer,"sections":sections,"tabs":tabsList,"active_tab":id};
+				}
+				else
+				{
+					return {"type":"applet","header":header,"sections":sections,"tabs":tabsList,"active_tab":id};
+				}
+			}
+			else if(id == "Files")
+			{
+				// project tab 4
+				button = List();
+				button.add(editDefaultProject);
+				header = {"title":"Files (page 1)","navigation":"new","buttons":button};
+				file_image_url = "https://i.imgur.com/2VA4szx.png";
+				project = invokeurl
+				[
+					url :"https://www.wrike.com/api/v4/" + account_id + "/folders/" + project_id + ""
+					type :GET
+					connection:"wrike"
+				];
+				info project;
+				dock = project.get("dock");
+				info dock;
+				vault_url = "";
+				for each  d in dock
+				{
+					if(d.get("name") == "vault")
+					{
+						vault_url = d.get("url");
+					}
+				}
+				project_name = project.get("name");
+				if(project_name.length() >= 50)
+				{
+					project_name = project_name.subString(0,47) + "..";
+				}
+				vault = invokeurl
+				[
+					url :vault_url
+					type :GET
+					connection:"wrike"
+				];
+				uploads_url = vault.get("uploads_url");
+				uploads_count = vault.get("uploads_count");
+				uploads = invokeurl
+				[
+					url :uploads_url
+					type :GET
+					connection:"wrike"
+				];
+				info uploads;
+				if(uploads.size() == 0)
+				{
+					sections = List();
+					elements = List();
+					elements.add({"type":"activity","title":"📄 You don't have any files yet! 🤔","description":"","image_url":"https://i.imgur.com/ZSIOsEj.png"});
+					elements.add(dividerElement);
+					sections.add({"id":1,"elements":elements});
+					return {"type":"applet","header":header,"footer":footer,"sections":sections,"tabs":tabsList,"active_tab":id};
+					//return {"type":"applet","data_type":"info","tabs":tabsList,"info":{"title":"📄 You don’t have any files yet.","description":"Click here to Create.","image_url":"https://i.imgur.com/ZSIOsEj.png"},"active_tab":id};
+				}
+				sections = List();
+				elements = List();
+				elements.add({"type":"title","text":project_name});
+				elements.add(dividerElement);
+				sections.add({"id":1,"elements":elements});
+				i = 2;
+				for each  upload in uploads
+				{
+					creator_name = upload.get("creator").get("name");
+					if(creator_name.length() >= 20)
+					{
+						creator_name = creator_name.subString(0,18) + "..";
+					}
+					description = "";
+					if(upload.get("description") != null)
+					{
+						description = upload.get("description");
+					}
+					description = description.replaceAll("&lt;","<").replaceAll("&gt;",">").replaceAll("&amp;","&");
+					description = description.replaceAll("<br>","\n");
+					description = description.replaceAll("<[^>]*>","");
+					description = description.trim();
+					if(description.length() >= 100)
+					{
+						description = description.subString(0,98) + "..";
+					}
+					view_people_button = {"label":creator_name,"type":"invoke.function","name":"viewpeople","id":id + "|" + upload.get("creator").get("id"),"emotion":"positive"};
+					elements = List();
+					elements.add({"type":"activity","title":upload.get("title"),"description":description + "\nCreated by " + " [View Profile]($1)","image_url":file_image_url,"button_references":{"1":view_people_button}});
+					elements.add({"type":"buttons","buttons":{{"label":"View Comments","emotion":"positive","type":"invoke.function","name":"viewcomments","id":id + "|" + upload.get("comments_url") + "|1"},{"label":"View","emotion":"positive","type":"open.url","url":upload.get("app_url")},{"label":"Download","emotion":"negative","type":"open.url","url":upload.get("app_download_url")}}});
+					elements.add(dividerElement);
+					sections.add({"id":i,"elements":elements});
+					i = i + 1;
+					if(i == 18)
+					{
+						break;
+					}
+				}
+				next_uploads = invokeurl
+				[
+					url :uploads_url + "?page=2"
+					type :GET
+					connection:"wrike"
+				];
+				info next_uploads;
+				if(next_uploads.size() != 0)
+				{
+					footer = {"text":footer_text,"buttons":{{"label":"Next Page","emotion":"positive","type":"invoke.function","name":"viewcontent","id":id + "|" + uploads_url + "|2"}}};
+					return {"type":"applet","header":header,"footer":footer,"sections":sections,"tabs":tabsList,"active_tab":id};
+				}
+				else
+				{
+					return {"type":"applet","header":header,"sections":sections,"tabs":tabsList,"active_tab":id};
+				}
+			}
+			else if(id == "Documents")
+			{
+				// project tab 4
+				button = List();
+				button.add(editDefaultProject);
+				header = {"title":"Documents (page 1)","navigation":"new","buttons":button};
+				doc_image_url = "https://i.imgur.com/2VA4szx.png";
+				project = invokeurl
+				[
+					url :"https://www.wrike.com/api/v4/" + account_id + "/folders/" + project_id + ""
+					type :GET
+					connection:"wrike"
+				];
+				info project;
+				dock = project.get("dock");
+				info dock;
+				vault_url = "";
+				for each  d in dock
+				{
+					if(d.get("name") == "vault")
+					{
+						vault_url = d.get("url");
+					}
+				}
+				project_name = project.get("name");
+				if(project_name.length() >= 50)
+				{
+					project_name = project_name.subString(0,47) + "..";
+				}
+				vault = invokeurl
+				[
+					url :vault_url
+					type :GET
+					connection:"wrike"
+				];
+				documents_url = vault.get("documents_url");
+				documents_count = vault.get("documents_count");
+				documents = invokeurl
+				[
+					url :documents_url
+					type :GET
+					connection:"wrike"
+				];
+				info documents;
+				if(documents.size() == 0)
+				{
+					sections = List();
+					elements = List();
+					elements.add({"type":"activity","title":"📄 You don't have any documents yet! 🤔","description":"Use `/wrike Create a Document` in any Cliq chat or use the message action (select a message, click more, and then click `Create a Document`) to create your first document 📚✨","image_url":"https://i.imgur.com/ZSIOsEj.png"});
+					elements.add(dividerElement);
+					sections.add({"id":1,"elements":elements});
+					return {"type":"applet","header":header,"footer":footer,"sections":sections,"tabs":tabsList,"active_tab":id};
+					//return {"type":"applet","data_type":"info","tabs":tabsList,"info":{"title":"📄 You don’t have any documents yet.","description":"Click here to Create.","image_url":"https://i.imgur.com/ZSIOsEj.png"},"active_tab":id};
+				}
+				sections = List();
+				elements = List();
+				elements.add({"type":"title","text":project_name});
+				elements.add(dividerElement);
+				sections.add({"id":1,"elements":elements});
+				i = 2;
+				for each  document in documents
+				{
+					creator_name = document.get("creator").get("name");
+					if(creator_name.length() >= 20)
+					{
+						creator_name = creator_name.subString(0,18) + "..";
+					}
+					view_people_button = {"label":creator_name,"type":"invoke.function","name":"viewpeople","id":id + "|" + document.get("creator").get("id"),"emotion":"positive"};
+					elements = List();
+					elements.add({"type":"activity","title":document.get("title"),"description":"Created by " + " [View Profile]($1)","image_url":doc_image_url,"button_references":{"1":view_people_button}});
+					elements.add({"type":"buttons","buttons":{{"label":"View Comments","emotion":"negative","type":"invoke.function","name":"viewcomments","id":id + "|" + document.get("comments_url") + "|1"},{"label":"View","emotion":"positive","type":"open.url","url":document.get("app_url")}}});
+					elements.add(dividerElement);
+					sections.add({"id":i,"elements":elements});
+					i = i + 1;
+					if(i == 18)
+					{
+						break;
+					}
+				}
+				next_documents = invokeurl
+				[
+					url :documents_url + "?page=2"
+					type :GET
+					connection:"wrike"
+				];
+				info next_documents;
+				if(next_documents.size() != 0)
+				{
+					footer = {"text":footer_text,"buttons":{{"label":"Next Page","emotion":"positive","type":"invoke.function","name":"viewcontent","id":id + "|" + documents_url + "|2"}}};
+					return {"type":"applet","header":header,"footer":footer,"sections":sections,"tabs":tabsList,"active_tab":id};
+				}
+				else
+				{
+					return {"type":"applet","header":header,"sections":sections,"tabs":tabsList,"active_tab":id};
+				}
+			}
+		}
+		else
+		{
+			// project not configured
+			return {"type":"applet","data_type":"info","tabs":tabsList,"info":{"title":"Your default project is not configured yet!","description":"Click here to configure.","image_url":"https://i.imgur.com/ZSIOsEj.png","button":{"label":"Configure Default Project","type":"invoke.function","name":"configureprojectform","emotion":"positive","id":"configuration"}},"active_tab":id};
+		}
+	}
+	else
+	{
+		// not connected
+		return {"type":"applet","data_type":"info","tabs":tabsList,"info":{"title":"You're not connected","description":"Use the Wrike Bot 🤖 to easily connect to your account and get started! 🔗","image_url":"https://i.imgur.com/ZSIOsEj.png"},"active_tab":id};
+		//return {"type":"applet","data_type":"info","info":{"title":"You're not connected","description":"use Wrike Bot to connect to your account"},"tabs":tabsList,"active_tab":id};
+	}
+}
+catch (e)
+{
+	info e;
+	return {"type":"applet","data_type":"info","tabs":tabsList,"info":{"title":"Oops! You've Hit the Fun Limit! 🎢","description":"Looks like you've reached the maximum number of calls for now. Take a break, grab a coffee ☕, and come back later for more fun and productivity! 🚀","image_url":"https://i.imgur.com/ZSIOsEj.png"},"active_tab":id};
+}
+return Map();

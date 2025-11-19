@@ -1,0 +1,72 @@
+
+response = Map();
+info arguments;
+key = arguments.get("key");
+splitIndex = key.indexOf("|");
+splitLastIndex = key.lastIndexOf("|");
+project_id = key.substring(0,splitIndex);
+info project_id;
+webhook_id = key.substring(splitIndex + 1,splitLastIndex).toNumber();
+info webhook_id;
+channel_unique_name = key.substring(splitLastIndex + 1,key.length());
+info channel_unique_name;
+query = Map();
+query.put("criteria","userid=" + user.get("id"));
+db = zoho.cliq.getRecords("wrikedb",query);
+account_id = db.get("list").get(0).get("accountid");
+delete_query = Map();
+delete_query.put("criteria","webhookid=" + webhook_id);
+get_delete_db = zoho.cliq.getRecords("wrikechannelmapping",delete_query);
+info get_delete_db;
+if(get_delete_db.get("list").size() > 0)
+{
+	project_name = get_delete_db.get("list").get(0).get("projectname");
+	info project_name;
+	record_id = get_delete_db.get("list").get(0).get("id");
+	info record_id;
+	delete_db = zoho.cliq.deleteRecord("wrikechannelmapping",record_id);
+	info delete_db;
+	webhook = invokeurl
+	[
+		url :"https://www.wrike.com/api/v4/" + account_id + "/folders/" + project_id + "/webhooks/" + webhook_id + ""
+		type :DELETE
+		connection:"wrike"
+	];
+	info webhook;
+	response = Map();
+	bot = Map();
+	bot.put("name","Wrike Bot");
+	bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+	response.put("bot",bot);
+	card = Map();
+	card.put("theme","poll");
+	card.put("thumbnail","https://i.imgur.com/ZSIOsEj.png");
+	response.put("card",card);
+	response.put("text","Hey [" + user.get("first_name") + "](zohoid:" + user.get("zoho_user_id") + ") 👋 you have unmapped the " + channel_unique_name + " channel from the project: " + project_name);
+	channel_response = Map();
+	bot = Map();
+	bot.put("name","Wrike Bot");
+	bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+	channel_response.put("bot",bot);
+	channel_card = Map();
+	channel_card.put("theme","poll");
+	channel_card.put("thumbnail","https://i.imgur.com/ZSIOsEj.png");
+	channel_response.put("card",channel_card);
+	channel_response.put("text","Hi all 👋\n [" + user.get("first_name") + "](zohoid:" + user.get("zoho_user_id") + ") has unmapped this channel from the project : " + project_name);
+	zoho.cliq.postToChannel(channel_unique_name,channel_response,"cliqwebhook");
+	return response;
+}
+else
+{
+	response = Map();
+	bot = Map();
+	bot.put("name","Wrike Bot");
+	bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+	response.put("bot",bot);
+	card = Map();
+	card.put("theme","poll");
+	card.put("thumbnail","https://i.imgur.com/ZSIOsEj.png");
+	response.put("card",card);
+	response.put("text","Hey [" + user.get("first_name") + "](zohoid:" + user.get("zoho_user_id") + ") 👋 , you have already unmapped this!");
+	return response;
+}

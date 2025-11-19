@@ -1,0 +1,566 @@
+
+try 
+{
+	query = Map();
+	query.put("criteria","userid=" + user.get("id"));
+	db = zoho.cliq.getRecords("wrikedb",query);
+	if(db.get("status") == "SUCCESS")
+	{
+		if(db.get("list").size() == 0)
+		{
+			response = invokeurl
+			[
+				url :"https://www.wrike.com/api/v4/accounts"
+				type :GET
+				connection:"wrike"
+			];
+			info response;
+			accounts = response.get("data");
+			if(accounts == null)
+			{
+				accounts = list();
+			}
+			info accounts;
+			account_id = "";
+			account_name = "";
+			for each  account in accounts
+			{
+				account_id = account.get("id");
+				account_name = account.get("name");
+				break;
+			}
+			if(account_id == "" || account_name == "")
+			{
+				response = Map();
+				bot = Map();
+				bot.put("name","Wrike Bot");
+				bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+				response.put("bot",bot);
+				buttonsList = list();
+				buttonsList0 = Map();
+				buttonsList0.put("label","Create Account");
+				buttonsList0.put("type","+");
+				action = Map();
+				action.put("type","open.url");
+				data = Map();
+				data.put("web","https://www.wrike.com/");
+				action.put("data",data);
+				buttonsList0.put("action",action);
+				buttonsList.add(buttonsList0);
+				response.put("buttons",buttonsList);
+				response.put("text","Hey " + user.get("first_name") + " ! You don't have any Wrike account associated with your profile.");
+				return response;
+			}
+			else
+			{
+				values = Map();
+				values.put("userid",user.get("id"));
+				values.put("accountid",account_id);
+				values.put("accountname",account_name);
+				db = zoho.cliq.createRecord("wrikedb",values);
+				info db;
+			}
+		}
+	}
+	else
+	{
+		response = Map();
+		bot = Map();
+		bot.put("name","Wrike Bot");
+		bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+		response.put("bot",bot);
+		card = Map();
+		card.put("theme","modern-inline");
+		response.put("card",card);
+		response.put("text","⚠️ Oops! Something went wrong. 😔 Please try again later");
+		return response;
+	}
+	try 
+	{
+		id = selections.toMap().get("title");
+		info id;
+	}
+	catch (e)
+	{
+		info e;
+		response = Map();
+		bot = Map();
+		bot.put("name","Wrike Bot");
+		bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+		response.put("bot",bot);
+		card = Map();
+		//card.put("title","Hello [" + user.get("first_name") + "](zohoid:" + user.get("zoho_user_id") + ") 👋");
+		card.put("theme","modern-inline");
+		response.put("card",card);
+		response.put("text","Hello [" + user.get("first_name") + "](zohoid:" + user.get("zoho_user_id") + ") 👋\nPlease Select an Option 🌟");
+		return response;
+	}
+	query = Map();
+	query.put("criteria","userid=" + user.get("id"));
+	db = zoho.cliq.getRecords("wrikedb",query);
+	if(id == "Create a To-do")
+	{
+		record_id = db.get("list").get(0).get("id");
+		account_id = db.get("list").get(0).get("accountid");
+		response = invokeurl
+		[
+			url :"https://www.wrike.com/api/v4/" + account_id + "/folders"
+			type :GET
+			connection:"wrike"
+		];
+		info response;
+		options = List();
+		for each  project in response
+		{
+			project_name = project.get("name");
+			if(project_name.length() >= 50)
+			{
+				project_name = project_name.subString(0,47) + "..";
+			}
+			dock = project.get("dock");
+			info dock;
+			todosets_url = "";
+			for each  d in dock
+			{
+				if(d.get("name") == "todoset")
+				{
+					todosets_url = d.get("url");
+					break;
+				}
+			}
+			if(todosets_url != "")
+			{
+				todosets = invokeurl
+				[
+					url :todosets_url
+					type :GET
+					connection:"wrike"
+				];
+				info todosets;
+				todolists_url = todosets.get("todolists_url");
+				option = Map();
+				option.put("value",todolists_url.replaceAll("/","-"));
+				option.put("label",project_name);
+				option.put("thumbnail","https://i.imgur.com/ZSIOsEj.png");
+				options.add(option);
+			}
+		}
+		if(options.size() == 0)
+		{
+			response = Map();
+			bot = Map();
+			bot.put("name","Wrike Bot");
+			bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+			response.put("bot",bot);
+			buttonsList = list();
+			buttonsList0 = Map();
+			buttonsList0.put("label","Create Project");
+			buttonsList0.put("type","+");
+			action = Map();
+			action.put("type","open.url");
+			data = Map();
+			data.put("web","https://www.wrike.com/workspace.htm");
+			action.put("data",data);
+			buttonsList0.put("action",action);
+			buttonsList.add(buttonsList0);
+			response.put("buttons",buttonsList);
+			response.put("text","Hey " + user.get("first_name") + " ! You don't have any Project associated with your " + db.get("list").get(0).get("accountname") + " account.");
+			return response;
+		}
+		inputs = list();
+		inputs.add({"name":"todolists_url","label":"Project name","placeholder":"Choose a Project","trigger_on_change":true,"multiple":false,"mandatory":true,"type":"dynamic_select","options":options});
+		form = {"type":"form","title":"Create a To-do ✅","name":"form","hint":"Note 📝: You need a To-do List to create and proceed with To-dos in the project. Use \"/wrike create a To-do list\" command to set up a To-do list.","version":1,"button_label":"Create","actions":{"submit":{"type":"invoke.function","name":"createtodos"}},"inputs":inputs};
+		return form;
+	}
+	if(id == "View a To-do List")
+	{
+		record_id = db.get("list").get(0).get("id");
+		account_id = db.get("list").get(0).get("accountid");
+		response = invokeurl
+		[
+			url :"https://www.wrike.com/api/v4/" + account_id + "/folders"
+			type :GET
+			connection:"wrike"
+		];
+		info response;
+		options = List();
+		for each  project in response
+		{
+			project_name = project.get("name");
+			if(project_name.length() >= 50)
+			{
+				project_name = project_name.subString(0,47) + "..";
+			}
+			dock = project.get("dock");
+			info dock;
+			todosets_url = "";
+			for each  d in dock
+			{
+				if(d.get("name") == "todoset")
+				{
+					todosets_url = d.get("url");
+					break;
+				}
+			}
+			if(todosets_url != "")
+			{
+				todosets = invokeurl
+				[
+					url :todosets_url
+					type :GET
+					connection:"wrike"
+				];
+				info todosets;
+				todolists_url = todosets.get("todolists_url");
+				option = Map();
+				option.put("value",todolists_url.replaceAll("/","-"));
+				option.put("label",project_name);
+				option.put("thumbnail","https://i.imgur.com/ZSIOsEj.png");
+				options.add(option);
+			}
+		}
+		if(options.size() == 0)
+		{
+			response = Map();
+			bot = Map();
+			bot.put("name","Wrike Bot");
+			bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+			response.put("bot",bot);
+			buttonsList = list();
+			buttonsList0 = Map();
+			buttonsList0.put("label","Create Project");
+			buttonsList0.put("type","+");
+			action = Map();
+			action.put("type","open.url");
+			data = Map();
+			data.put("web","https://www.wrike.com/workspace.htm");
+			action.put("data",data);
+			buttonsList0.put("action",action);
+			buttonsList.add(buttonsList0);
+			response.put("buttons",buttonsList);
+			response.put("text","Hey " + user.get("first_name") + " ! You don't have any Project associated with your " + db.get("list").get(0).get("accountname") + " account.");
+			return response;
+		}
+		inputs = list();
+		inputs.add({"name":"todolists_url","label":"Project name","placeholder":"Choose a Project","trigger_on_change":true,"multiple":false,"mandatory":true,"type":"dynamic_select","options":options});
+		form = {"type":"form","title":"View a To-do List 📝","name":"form","version":1,"button_label":"View 👁️","actions":{"submit":{"type":"invoke.function","name":"viewtodoswithinlist"}},"inputs":inputs};
+		return form;
+	}
+	else if(id == "Create a To-do List")
+	{
+		record_id = db.get("list").get(0).get("id");
+		account_id = db.get("list").get(0).get("accountid");
+		response = invokeurl
+		[
+			url :"https://www.wrike.com/api/v4/" + account_id + "/folders"
+			type :GET
+			connection:"wrike"
+		];
+		info response;
+		options = List();
+		for each  project in response
+		{
+			project_name = project.get("name");
+			if(project_name.length() >= 50)
+			{
+				project_name = project_name.subString(0,47) + "..";
+			}
+			dock = project.get("dock");
+			info dock;
+			todosets_url = "";
+			for each  d in dock
+			{
+				if(d.get("name") == "todoset")
+				{
+					todosets_url = d.get("url");
+					break;
+				}
+			}
+			if(todosets_url != "")
+			{
+				option = Map();
+				option.put("value",todosets_url.replaceAll("/","-"));
+				option.put("label",project_name);
+				option.put("thumbnail","https://i.imgur.com/ZSIOsEj.png");
+				options.add(option);
+			}
+		}
+		if(options.size() == 0)
+		{
+			response = Map();
+			bot = Map();
+			bot.put("name","Wrike Bot");
+			bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+			response.put("bot",bot);
+			buttonsList = list();
+			buttonsList0 = Map();
+			buttonsList0.put("label","Create Project");
+			buttonsList0.put("type","+");
+			action = Map();
+			action.put("type","open.url");
+			data = Map();
+			data.put("web","https://www.wrike.com/workspace.htm");
+			action.put("data",data);
+			buttonsList0.put("action",action);
+			buttonsList.add(buttonsList0);
+			response.put("buttons",buttonsList);
+			response.put("text","Hey " + user.get("first_name") + " ! You don't have any Project associated with your " + db.get("list").get(0).get("accountname") + " account.");
+			return response;
+		}
+		inputs = list();
+		inputs.add({"name":"todosets_url","label":"Project name","placeholder":"Choose a Project","multiple":false,"mandatory":true,"type":"dynamic_select","options":options});
+		inputs.add({"label":"Name","name":"name","placeholder":"To-do List Name","min_length":"0","max_length":"60","mandatory":true,"type":"text"});
+		inputs.add({"label":"Description","name":"description","placeholder":"Add extra details","min_length":"0","max_length":"200","mandatory":false,"type":"textarea"});
+		form = {"type":"form","title":"Create a To-do List 📋","name":"form","version":1,"button_label":"Create","actions":{"submit":{"type":"invoke.function","name":"createtodolist"}},"inputs":inputs};
+		return form;
+	}
+	if(id == "Create a Schedule")
+	{
+		record_id = db.get("list").get(0).get("id");
+		account_id = db.get("list").get(0).get("accountid");
+		response = invokeurl
+		[
+			url :"https://www.wrike.com/api/v4/" + account_id + "/folders"
+			type :GET
+			connection:"wrike"
+		];
+		info response;
+		options = List();
+		for each  project in response
+		{
+			project_name = project.get("name");
+			if(project_name.length() >= 50)
+			{
+				project_name = project_name.subString(0,47) + "..";
+			}
+			dock = project.get("dock");
+			info dock;
+			schedule_url = "";
+			for each  d in dock
+			{
+				if(d.get("name") == "schedule")
+				{
+					schedule_url = d.get("url");
+					break;
+				}
+			}
+			if(schedule_url != "")
+			{
+				option = Map();
+				option.put("value",schedule_url.replaceAll("/","-"));
+				option.put("label",project_name);
+				option.put("thumbnail","https://i.imgur.com/ZSIOsEj.png");
+				options.add(option);
+			}
+		}
+		if(options.size() == 0)
+		{
+			response = Map();
+			bot = Map();
+			bot.put("name","Wrike Bot");
+			bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+			response.put("bot",bot);
+			buttonsList = list();
+			buttonsList0 = Map();
+			buttonsList0.put("label","Create Project");
+			buttonsList0.put("type","+");
+			action = Map();
+			action.put("type","open.url");
+			data = Map();
+			data.put("web","https://www.wrike.com/workspace.htm");
+			action.put("data",data);
+			buttonsList0.put("action",action);
+			buttonsList.add(buttonsList0);
+			response.put("buttons",buttonsList);
+			response.put("text","Hey " + user.get("first_name") + " ! You don't have any Project associated with your " + db.get("list").get(0).get("accountname") + " account.");
+			return response;
+		}
+		peoples_response = invokeurl
+		[
+			url :"https://www.wrike.com/api/v4/contacts?accountId=" + account_id
+			type :GET
+			connection:"wrike"
+		];
+		peoples = peoples_response.get("data");
+		if(peoples == null)
+		{
+			peoples = list();
+		}
+		info peoples;
+		people_options = List();
+		for each  people in peoples
+		{
+			if(people.get("type") == "Person")
+			{
+				people_name = "";
+				if(people.get("firstName") != null)
+				{
+					people_name = people.get("firstName");
+				}
+				if(people.get("lastName") != null)
+				{
+					people_name = (people_name + " " + people.get("lastName")).trim();
+				}
+				if(people_name == "")
+				{
+					people_name = people.get("id");
+				}
+				if(people_name.length() >= 50)
+				{
+					people_name = people_name.subString(0,47) + "..";
+				}
+				people_id = people.get("id");
+				people_option = {"label":people_name,"value":people_id};
+				people_options.add(people_option);
+			}
+		}
+		info people_options;
+		inputs = list();
+		inputs.add({"name":"schedule_url","label":"Project Name","placeholder":"Choose  Project","multiple":false,"mandatory":true,"type":"dynamic_select","options":options});
+		inputs.add({"label":"Summary","name":"summary","placeholder":"Schedule summary","min_length":"0","max_length":"60","mandatory":true,"type":"text"});
+		inputs.add({"label":"Description","name":"description","placeholder":"Add extra details","min_length":"0","max_length":"200","mandatory":false,"type":"textarea"});
+		inputs.add({"label":"Starts at ⏰","name":"starts_at","placeholder":"Starts at","mandatory":true,"type":"datetime"});
+		inputs.add({"label":"End at ⏰","name":"ends_at","placeholder":"End at","mandatory":true,"type":"datetime"});
+		inputs.add({"type":"dynamic_select","name":"participants","placeholder":"Select People","label":"Participants 👥","mandatory":false,"multiple":true,"options":people_options});
+		form = {"type":"form","title":"Create a Schedule 📅","name":"form","version":1,"button_label":"Create","actions":{"submit":{"type":"invoke.function","name":"createschedule"}},"inputs":inputs};
+		return form;
+	}
+	/*if(id == "Create a Message")
+	{
+		record_id = db.get("list").get(0).get("id");
+		account_id = db.get("list").get(0).get("accountid");
+		projects = invokeurl
+		[
+			url :"https://www.wrike.com/api/v4/" + account_id + "/folders"
+			type :GET
+			connection:"wrike"
+		];
+		info projects;
+		options = List();
+		for each  project in projects
+		{
+			project_name = project.get("name");
+			if(project_name.length() >= 50)
+			{
+				project_name = project_name.subString(0,47) + "..";
+			}
+			project_url = project.get("url");
+			option = Map();
+			option.put("value",project_url.replaceAll("/","-"));
+			option.put("label",project_name);
+			option.put("thumbnail","https://i.imgur.com/ZSIOsEj.png");
+			options.add(option);
+		}
+		if(options.size() == 0)
+		{
+			response = Map();
+			bot = Map();
+			bot.put("name","Wrike Bot");
+			bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+			response.put("bot",bot);
+			buttonsList = list();
+			buttonsList0 = Map();
+			buttonsList0.put("label","Create Project");
+			buttonsList0.put("type","+");
+			action = Map();
+			action.put("type","open.url");
+			data = Map();
+			data.put("web","https://www.wrike.com/workspace.htm");
+			action.put("data",data);
+			buttonsList0.put("action",action);
+			buttonsList.add(buttonsList0);
+			response.put("buttons",buttonsList);
+			response.put("text","Hey " + user.get("first_name") + " ! You don't have any Project associated with your " + db.get("list").get(0).get("accountname") + " account.");
+			return response;
+		}
+		inputs = list();
+		message_types = List();
+		message_types.add({"value":"message_board","label":"Message Board"});
+		message_types.add({"value":"chat","label":"Chat"});
+		inputs.add({"name":"project_url","label":"Project Name","placeholder":"Choose a Project","multiple":false,"mandatory":true,"type":"dynamic_select","options":options});
+		inputs.add({"name":"message_type","label":"Message Type","placeholder":"Choose a Message Type","multiple":false,"mandatory":true,"type":"dynamic_select","trigger_on_change":true,"options":message_types});
+		inputs.add({"label":"Content","name":"content","placeholder":"message","mandatory":true,"type":"textarea","min_length":"0","max_length":"500"});
+		form = {"type":"form","title":"Create a Message","name":"form","version":1,"button_label":"Create","actions":{"submit":{"type":"invoke.function","name":"createamessage"}},"inputs":inputs};
+		return form;
+	}*/
+	if(id == "Create a Document")
+	{
+		record_id = db.get("list").get(0).get("id");
+		account_id = db.get("list").get(0).get("accountid");
+		projects = invokeurl
+		[
+			url :"https://www.wrike.com/api/v4/" + account_id + "/folders"
+			type :GET
+			connection:"wrike"
+		];
+		info projects;
+		options = List();
+		for each  project in projects
+		{
+			project_name = project.get("name");
+			if(project_name.length() >= 50)
+			{
+				project_name = project_name.subString(0,47) + "..";
+			}
+			dock = project.get("dock");
+			info dock;
+			vault_url = "";
+			for each  d in dock
+			{
+				if(d.get("name") == "vault")
+				{
+					vault_url = d.get("url");
+				}
+			}
+			option = Map();
+			option.put("value",vault_url.replaceAll("/","-"));
+			option.put("label",project_name);
+			option.put("thumbnail","https://i.imgur.com/ZSIOsEj.png");
+			options.add(option);
+		}
+		if(options.size() == 0)
+		{
+			response = Map();
+			bot = Map();
+			bot.put("name","Wrike Bot");
+			bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+			response.put("bot",bot);
+			buttonsList = list();
+			buttonsList0 = Map();
+			buttonsList0.put("label","Create Project");
+			buttonsList0.put("type","+");
+			action = Map();
+			action.put("type","open.url");
+			data = Map();
+			data.put("web","https://www.wrike.com/workspace.htm");
+			action.put("data",data);
+			buttonsList0.put("action",action);
+			buttonsList.add(buttonsList0);
+			response.put("buttons",buttonsList);
+			response.put("text","Hey " + user.get("first_name") + " ! You don't have any Project associated with your " + db.get("list").get(0).get("accountname") + " account.");
+			return response;
+		}
+		inputs = list();
+		inputs.add({"name":"vault_url","label":"Project Name","placeholder":"Choose a Project","multiple":false,"mandatory":true,"type":"dynamic_select","options":options});
+		inputs.add({"label":"Title","name":"title","placeholder":"title","mandatory":true,"type":"text","min_length":"0","max_length":"50"});
+		inputs.add({"label":"Content","name":"content","placeholder":"message","mandatory":true,"type":"textarea","min_length":"0","max_length":"1000"});
+		form = {"type":"form","title":"Create a Document","name":"form","version":1,"button_label":"Create","actions":{"submit":{"type":"invoke.function","name":"createadocument"}},"inputs":inputs};
+		return form;
+	}
+}
+catch (e)
+{
+	info e;
+	response = Map();
+	bot = Map();
+	bot.put("name","Wrike Bot");
+	bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+	response.put("bot",bot);
+	card = Map();
+	card.put("title","Oops! You've Hit the Fun Limit! 🎢");
+	card.put("theme","modern-inline");
+	response.put("card",card);
+	response.put("text","Looks like you've reached the maximum number of calls for now. Take a break, grab a coffee ☕, and come back later for more fun and productivity! 🚀");
+	return response;
+}
+return Map();

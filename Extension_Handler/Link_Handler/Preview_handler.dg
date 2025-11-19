@@ -1,0 +1,109 @@
+
+info url;
+record_id = "";
+if(url.contains("id="))
+{
+	record_id = url.substring(url.indexOf("id=") + 3,url.length());
+	if(record_id.contains("&"))
+	{
+		record_id = record_id.substring(0,record_id.indexOf("&"));
+	}
+}
+if(record_id == "")
+{
+	return Map();
+}
+api_url = "https://www.wrike.com/api/v4/tasks/" + record_id;
+api_response = invokeurl
+[
+	url :api_url
+	type :GET
+	connection:"wrike"
+];
+records = api_response.get("data");
+record = Map();
+record_type = "Task";
+if(records != null && records.size() != 0)
+{
+	record = records.get(0);
+	record_type = "Task";
+}
+else
+{
+	api_url = "https://www.wrike.com/api/v4/folders/" + record_id;
+	api_response = invokeurl
+	[
+		url :api_url
+		type :GET
+		connection:"wrike"
+	];
+	records = api_response.get("data");
+	if(records != null && records.size() != 0)
+	{
+		record = records.get(0);
+		record_type = "Folder";
+	}
+}
+title = "";
+if(record.containsKey("title"))
+{
+	title = record.get("title") + " | ";
+}
+else if(record.containsKey("name"))
+{
+	title = record.get("name") + " | ";
+}
+description = "";
+if(record.containsKey("briefDescription"))
+{
+	description = record.get("briefDescription");
+}
+else if(record.containsKey("description"))
+{
+	description = record.get("description");
+}
+description = description.replaceAll("&lt;","<").replaceAll("&gt;",">").replaceAll("&amp;","&");
+description = description.replaceAll("<br>","\n");
+description = description.replaceAll("<[^>]*>","");
+description = description.trim();
+response = Map();
+response.put("type","link");
+response.put("provider_url",url);
+response.put("title",title + " Wrike");
+response.put("thumbnail_url","https://i.imgur.com/ZSIOsEj.png");
+response.put("favicon_url","https://i.imgur.com/ZSIOsEj.png");
+response.put("description",description);
+fieldsData = list();
+field_1 = Map();
+field_1.put("label","Type");
+field_1.put("value",record_type);
+fieldsData.add(field_1);
+if(record.containsKey("createdBy") && record.get("createdBy").size() != 0)
+{
+	created_by = record.get("createdBy").get(0);
+	if(created_by.get("firstName") != null)
+	{
+		field_2 = Map();
+		field_2.put("label","Created By");
+		creator_name = created_by.get("firstName");
+		if(created_by.get("lastName") != null)
+		{
+			creator_name = creator_name + " " + created_by.get("lastName");
+		}
+		field_2.put("value",creator_name);
+		fieldsData.add(field_2);
+	}
+}
+if(record.containsKey("createdDate"))
+{
+	created_at = record.get("createdDate");
+	created_at = created_at.replaceAll("T"," ").subString(0,created_at.lastIndexOf(":"));
+	field_3 = Map();
+	field_3.put("label","Created On");
+	field_3.put("value",created_at);
+	fieldsData.add(field_3);
+}
+fields = Map();
+fields.put("data",fieldsData);
+response.put("fields",fields);
+return response;

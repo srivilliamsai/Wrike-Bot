@@ -1,0 +1,108 @@
+
+response = Map();
+info arguments;
+key = arguments.get("key");
+if(key != "generated")
+{
+	token = arguments.get("input").get("token");
+	info token;
+}
+query = Map();
+query.put("criteria","userid=" + user.get("id"));
+db_query = zoho.cliq.getRecords("wrikedb",query);
+record_id = db_query.get("list").get(0).get("id");
+account_id = db_query.get("list").get(0).get("accountid");
+query_zapikey = Map();
+query_zapikey.put("criteria","userid=" + user.get("id"));
+db_query_zapikey = zoho.cliq.getRecords("wrikezapikey",query_zapikey);
+if(db_query_zapikey.get("list").size() != 0)
+{
+	token = db_query_zapikey.get("list").get(0).get("token");
+}
+else
+{
+	values = Map();
+	values.put("userid",user.get("id"));
+	values.put("zapikey",token);
+	db = zoho.cliq.createRecord("wrikezapikey",values);
+}
+projects = invokeurl
+[
+	url :"https://www.wrike.com/api/v4/" + account_id + "/folders"
+	type :GET
+	connection:"wrike"
+];
+info projects;
+options = List();
+for each  project in projects
+{
+	q = Map();
+	q.put("criteria","projectid=" + project.get("id"));
+	db_channelmapping = zoho.cliq.getRecords("wrikechannelmapping",q);
+	info db_channelmapping;
+	if(db_channelmapping.get("list").size() == 0)
+	{
+		// allow only if mapping not exist
+		project_name = project.get("name");
+		if(project_name.length() >= 50)
+		{
+			project_name = project_name.subString(0,47) + "..";
+		}
+		project_id = project.get("id");
+		option = Map();
+		option.put("value",project_id);
+		option.put("label",project_name);
+		option.put("thumbnail","https://i.imgur.com/ZSIOsEj.png");
+		options.add(option);
+	}
+}
+if(options.size() == 0)
+{
+	if(projects.size() != 0)
+	{
+		response = Map();
+		bot = Map();
+		bot.put("name","Wrike Bot");
+		bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+		response.put("bot",bot);
+		card = Map();
+		card.put("theme","poll");
+		response.put("card",card);
+		response.put("text","❗ All projects are currently mapped.");
+		return response;
+	}
+	// no projects in account
+	response = Map();
+	bot = Map();
+	bot.put("name","Wrike Bot");
+	bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+	response.put("bot",bot);
+	card = Map();
+	card.put("theme","poll");
+	response.put("card",card);
+	response.put("text","❗You don't have any projects in your Wrike account: " + db.get("list").get(0).get("accountname"));
+	return response;
+}
+events = List();
+events.add({"label":"Todolist","value":"Todolist"});
+events.add({"label":"Todo","value":"Todo"});
+events.add({"label":"Schedule::Entry","value":"Schedule::Entry"});
+events.add({"label":"Upload","value":"Upload"});
+events.add({"label":"Document","value":"Document"});
+events.add({"label":"Client::Approval::Response","value":"Client::Approval::Response"});
+events.add({"label":"Client::Reply","value":"Client::Reply"});
+events.add({"label":"Client::Forward","value":"Client::Forward"});
+events.add({"label":"Vault","value":"Vault"});
+events.add({"label":"Message","value":"Message"});
+events.add({"label":"Comment","value":"Comment"});
+events.add({"label":"Question","value":"Question"});
+events.add({"label":"Question::Answer","value":"Question::Answer"});
+events.add({"label":"Inbox::Forward","value":"Inbox::Forward"});
+events.add({"label":"GoogleDocument","value":"GoogleDocument"});
+events.add({"label":"CloudFile","value":"CloudFile"});
+inputs = list();
+inputs.add({"name":"project_id","label":"Project Name","placeholder":"Choose a Project","multiple":false,"mandatory":true,"type":"dynamic_select","options":options});
+inputs.add({"label":"Choose a channel","name":"channel_id","placeholder":"Choose from the list of all channels.","multiple":false,"mandatory":true,"type":"native_select","extension_association":true,"data_source":"channels"});
+inputs.add({"type":"dynamic_select","name":"events","placeholder":"Select Event","label":"Events","mandatory":true,"multiple":true,"options":events});
+form = {"type":"form","title":"Map Channel","name":"form","version":1,"button_label":"Map Channel","actions":{"submit":{"type":"invoke.function","name":"mapchannel"}},"inputs":inputs};
+return form;

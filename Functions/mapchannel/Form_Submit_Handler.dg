@@ -1,0 +1,152 @@
+
+form_data = form.get("values");
+info form_data;
+project_id = form_data.get("project_id").get("value");
+project_name = form_data.get("project_id").get("label");
+if(project_name == "Getting Started")
+{
+	info "error banner";
+	banner = {"text":"Notifications can't be configured for 'Getting Started' as it's Wrike's default project.","status":"failure","type":"banner"};
+	return banner;
+}
+channel_id = form_data.get("channel_id").get("id");
+channel_unique_name = form_data.get("channel_id").get("unique_name");
+events = form_data.get("events");
+events_list = List();
+for each  event in events
+{
+	events_list.add(event.get("value"));
+}
+info events_list;
+//token = form_data.get("token");
+query = Map();
+query.put("criteria","userid=" + user.get("id"));
+db = zoho.cliq.getRecords("wrikedb",query);
+record_id = db.get("list").get(0).get("id");
+account_id = db.get("list").get(0).get("accountid");
+query_zapikey = Map();
+query_zapikey.put("criteria","userid=" + user.get("id"));
+db_zapikey = zoho.cliq.getRecords("wrikezapikey",query);
+zapikey = db_zapikey.get("list").get(0).get("zapikey");
+
+APPID = "<APPID>";
+APPKEY = "<APPKEY>";
+payload_url = "https://cliq.zoho.com/api/v2/applications/" + APPID + "/incoming?appkey=" + APPKEY + "&zapikey=" + zapikey;
+parameters = Map();
+parameters.put("payload_url",payload_url);
+parameters.put("types",events_list);
+headers = Map();
+headers.put("Content-Type","application/json");
+webhook = invokeurl
+[
+	url :"https://www.wrike.com/api/v4/" + account_id + "/folders/" + project_id + "/webhooks"
+	type :POST
+	parameters:toString(parameters)
+	headers:headers
+	connection:"wrike"
+];
+info webhook;
+webhook_id = webhook.get("id");
+values = Map();
+values.put("userid",user.get("id"));
+values.put("projectid",project_id);
+values.put("projectname",project_name);
+values.put("channelid",channel_id);
+values.put("webhookid",webhook_id);
+values.put("events",events_list);
+values.put("channeluniquename",channel_unique_name);
+info values;
+parameters = Map();
+parameters.put("channel_unique_name",channel_unique_name);
+add_bot_to_channel = invokeurl
+[
+	url :"https://cliq.zoho.com/api/v2/bots/wrikebot/associate"
+	type :POST
+	parameters:toString(parameters)
+	connection:"cliqwebhook"
+];
+info add_bot_to_channel;
+db = zoho.cliq.createRecord("wrikechannelmapping",values);
+if(db.get("status").equalsIgnoreCase("SUCCESS") && webhook_id != null)
+{
+	event_format = "";
+	for each  event in events_list
+	{
+		event_format = event_format + "✅" + event + "\n";
+	}
+	response = Map();
+	bot = Map();
+	bot.put("name","Wrike Bot");
+	bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+	response.put("bot",bot);
+	card = Map();
+	card.put("theme","modern-inline");
+	card.put("thumbnail","https://i.imgur.com/ZSIOsEj.png");
+	response.put("card",card);
+	response.put("text","Hey [" + user.get("first_name") + "](zohoid:" + user.get("zoho_user_id") + ") 👋 you have mapped " + channel_unique_name + " channel with the project " + project_name + " \n\n\n\n " + event_format);
+	channel_response = Map();
+	bot = Map();
+	bot.put("name","Wrike Bot");
+	bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+	channel_response.put("bot",bot);
+	channel_card = Map();
+	channel_card.put("theme","modern-inline");
+	channel_card.put("thumbnail","https://i.imgur.com/ZSIOsEj.png");
+	channel_response.put("card",channel_card);
+	channel_response.put("text","Hi all 👋\n [" + user.get("first_name") + "](zohoid:" + user.get("zoho_user_id") + ") has mapped this channel with the project " + project_name + "\nYou'll be notified in this channel about the following events \n\n\n" + event_format);
+	channel_message = zoho.cliq.postToChannel(channel_unique_name,channel_response,"cliqwebhook");
+	channel_info = invokeurl
+	[
+		url :"https://cliq.zoho.com/api/v2/channels/" + channel_id
+		type :GET
+		connection:"cliqwebhook"
+	];
+	info channel_info;
+	last_message_id = channel_info.get("last_message_info").get("message_id");
+	info last_message_id;
+	query = Map();
+	query.put("criteria","projectid=" + project_id);
+	db = zoho.cliq.getRecords("wrikechannelmapping",query);
+	record_id = db.get("list").get(0).get("id");
+	query_update = Map();
+	query_update.put("threadid",last_message_id);
+	db_update = zoho.cliq.updateRecord("wrikechannelmapping",record_id,query_update);
+	info db_update;
+	project_short_name = project_name;
+	if(project_short_name.length() >= 25)
+	{
+		project_short_name = project_short_name.substring(0,23) + "..";
+	}
+	thread_name = project_short_name + " Wrike Notification Thread";
+	parameters = Map();
+	parameters.put("text",thread_name + " Created");
+	parameters.put("post_in_parent",true);
+	parameters.put("thread_message_id",last_message_id);
+	parameters.put("thread_title",thread_name);
+	headers = Map();
+	headers.put("Content-Type","application/json");
+	create_thread = invokeurl
+	[
+		url :"https://cliq.zoho.com/api/v2/channelsbyname/" + channel_unique_name + "/message?bot_unique_name=wrikebot"
+		type :POST
+		parameters:toString(parameters)
+		headers:headers
+		connection:"cliqwebhook"
+	];
+	info create_thread;
+	return response;
+}
+else
+{
+	response = Map();
+	bot = Map();
+	bot.put("name","Wrike Bot");
+	bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+	response.put("bot",bot);
+	card = Map();
+	card.put("theme","modern-inline");
+	response.put("card",card);
+	response.put("text","⚠️ Oops! Something went wrong. 😔 Please try again later");
+	return response;
+}
+return Map();

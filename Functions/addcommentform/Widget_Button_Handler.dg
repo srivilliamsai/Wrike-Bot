@@ -1,0 +1,7 @@
+
+id = target.get("id");
+inputs = list();
+inputs.add({"label":"Comment","name":"comment","placeholder":"Comment","min_length":"1","max_length":"100","mandatory":false,"type":"textarea"});
+inputs.add({"name":"id","value":id,"type":"hidden"});
+form = {"type":"form","title":"Add Comment","name":"form","version":1,"button_label":"Add Comment","actions":{"submit":{"type":"invoke.function","name":"addcomment"}},"inputs":inputs};
+return form;

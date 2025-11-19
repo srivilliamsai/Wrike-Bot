@@ -1,0 +1,152 @@
+
+query = Map();
+query.put("criteria","userid=" + user.get("id"));
+db = zoho.cliq.getRecords("wrikedb",query,"cliqwebhook");
+if(db.get("status") == "SUCCESS" && db.get("list").size() != 0)
+{
+	account_id = db.get("list").get(0).get("accountid");
+	project_id = db.get("list").get(0).get("projectid");
+	todolist_id = db.get("list").get(0).get("todolistid");
+	if(account_id != 0 && project_id != 0 && todolist_id != 0)
+	{
+		info "configured";
+		i = 0;
+		response = Map();
+		bot = Map();
+		bot.put("name","Wrike Bot");
+		bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+		response.put("bot",bot);
+		card = Map();
+		card.put("title","Tasks Due Today 📋");
+		card.put("theme","modern-inline");
+		response.put("card",card);
+		slidesList = list();
+		tasks_url = "https://www.wrike.com/api/v4/tasks?folderId=" + todolist_id + "&dueDate=today&status=Active";
+		tasks_response = invokeurl
+		[
+			url :tasks_url
+			type :GET
+			connection:"wrike"
+		];
+		tasks = tasks_response.get("data");
+		if(tasks == null)
+		{
+			tasks = list();
+		}
+		info tasks;
+		if(tasks.size() != 0)
+		{
+			for each  current_task in tasks
+			{
+				due_on = current_task.get("dueDate");
+				if(due_on == null)
+				{
+					continue;
+				}
+				due_on = due_on.subString(0,due_on.lastIndexOf("T"));
+				current_date = zoho.currentdate;
+				if(due_on.getDate() == current_date.getDate() && due_on.getMonth() == current_date.getMonth() && due_on.getYear() == current_date.getYear())
+				{
+					task_title = current_task.get("title");
+					if(task_title.length() >= 50)
+					{
+						task_title = task_title.subString(0,47) + "..";
+					}
+					description = "-";
+					if(current_task.get("description") != null)
+					{
+						description = current_task.get("description");
+					}
+					description = description.replaceAll("&lt;","<").replaceAll("&gt;",">").replaceAll("&amp;","&");
+					description = description.replaceAll("<br>","\n");
+					description = description.replaceAll("<[^>]*>","");
+					description = description.trim();
+					if(description.length() >= 50)
+					{
+						description = description.subString(0,47) + "..";
+					}
+					slidesList0 = Map();
+					slidesList0.put("type","text");
+					slidesList0.put("title",task_title);
+					slidesList0.put("data","Description: " + description);
+					buttonsList = list();
+					buttonsList0 = Map();
+					buttonsList0.put("label","View Task");
+					//buttonsList0.put("type","+");
+					action = Map();
+					action.put("type","open.url");
+					data = Map();
+					if(current_task.containsKey("permalink"))
+					{
+						data.put("web",current_task.get("permalink"));
+					}
+					else
+					{
+						data.put("web","https://www.wrike.com/open.htm?id=" + current_task.get("id"));
+					}
+					action.put("data",data);
+					buttonsList0.put("action",action);
+					buttonsList.add(buttonsList0);
+					//function button
+					buttonsList1 = Map();
+					buttonsList1.put("label","More Details");
+					buttonsList1.put("type","+");
+					action = Map();
+					action.put("type","invoke.function");
+					data = Map();
+					data.put("name","viewcontent");
+					action.put("data",data);
+					buttonsList1.put("action",action);
+					buttonsList1.put("key","tasks_url|" + current_task.get("id"));
+					buttonsList.add(buttonsList1);
+					slidesList0.put("buttons",buttonsList);
+					slidesList.add(slidesList0);
+					i = i + 1;
+					if(i == 5)
+					{
+						break;
+					}
+				}
+			}
+			if(slidesList.size() == 0)
+			{
+				info "no due tasks";
+				response = Map();
+				bot = Map();
+				bot.put("name","Wrike Bot");
+				bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+				response.put("bot",bot);
+				card = Map();
+				card.put("title","No Deadline Tasks Today 🗓️");
+				card.put("theme","modern-inline");
+				response.put("card",card);
+				response.put("text","😊 Great news! There are no tasks with deadlines today. Enjoy your day! 🌟");
+				info response;
+				zoho.cliq.postToBot("wrikebot",response,"cliqwebhook");
+			}
+			else
+			{
+				response.put("slides",slidesList);
+				response.put("text","Here are the tasks that are due today. Stay organized and focused to meet your deadlines. Let's make it a productive day! 💪");
+				info response;
+				zoho.cliq.postToBot("wrikebot",response,"cliqwebhook");
+			}
+		}
+		else
+		{
+			info "no tasks";
+			response = Map();
+			bot = Map();
+			bot.put("name","Wrike Bot");
+			bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+			response.put("bot",bot);
+			card = Map();
+			card.put("title","No Deadline Tasks Today 🗓️");
+			card.put("theme","modern-inline");
+			response.put("card",card);
+			response.put("text","😊 Great news! There are no tasks with deadlines today. Enjoy your day! 🌟");
+			info response;
+			zoho.cliq.postToBot("wrikebot",response,"cliqwebhook");
+		}
+	}
+}

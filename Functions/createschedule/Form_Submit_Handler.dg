@@ -1,0 +1,86 @@
+
+form_data = form.get("values");
+schedule_url = form_data.get("schedule_url").get("value").replaceAll("-","/");
+summary = form_data.get("summary").replaceAll("\n"," ").replaceAll("\t"," ").replaceAll("\r"," ");
+description = form_data.get("description").replaceAll("\n","<br>").replaceAll("\t"," ").replaceAll("\r"," ");
+participants = form_data.get("participants");
+participant_ids = List();
+for each  participant in participants
+{
+	participant_ids.add(participant.get("value"));
+}
+starts_at = form_data.get("starts_at").get("date_time");
+ends_at = form_data.get("ends_at").get("date_time");
+schedule = invokeurl
+[
+	url :schedule_url
+	type :GET
+	connection:"wrike"
+];
+info schedule;
+entries_url = schedule.get("entries_url");
+parameters = Map();
+parameters.put("summary",summary);
+parameters.put("description",description);
+parameters.put("starts_at",starts_at);
+parameters.put("ends_at",ends_at);
+parameters.put("participant_ids",participant_ids);
+headers = Map();
+headers.put("Content-Type","application/json");
+schedule_entry = invokeurl
+[
+	url :entries_url
+	type :POST
+	parameters:toString(parameters)
+	headers:headers
+	connection:"wrike"
+];
+info schedule_entry;
+if(schedule_entry.containskey("app_url"))
+{
+	app_url = schedule_entry.get("app_url");
+	response = Map();
+	bot = Map();
+	bot.put("name","Wrike Bot");
+	bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+	response.put("bot",bot);
+	card = Map();
+	card.put("title","[Schedule](" + schedule_entry.get("parent").get("app_url") + ")");
+	card.put("theme","modern-inline");
+	card.put("icon","https://i.imgur.com/ZSIOsEj.png");
+	card.put("thumbnail","https://i.imgur.com/ZSIOsEj.png");
+	response.put("card",card);
+	buttonsList = list();
+	buttonsList0 = Map();
+	buttonsList0.put("label","View Schedule");
+	buttonsList0.put("type","+");
+	action = Map();
+	action.put("type","open.url");
+	data = Map();
+	data.put("web",app_url);
+	action.put("data",data);
+	buttonsList0.put("action",action);
+	buttonsList.add(buttonsList0);
+	response.put("buttons",buttonsList);
+	query = Map();
+	query.put("criteria","userid=" + user.get("id"));
+	db = zoho.cliq.getRecords("wrikedb",query);
+	account_id = db.get("list").get(0).get("accountid");
+	project_url = "https://www.wrike.com/open.htm?id=" + schedule_entry.get("folder").get("id");
+	response.put("text","Hey [" + user.get("first_name") + "](zohoid:" + user.get("zoho_user_id") + ") 👋 \nProject Name: [" + schedule_entry.get("folder").get("name") + "](" + project_url + ") \n\nYou've successfully created a Schedule : " + summary + ". Great job!");
+	return response;
+}
+else
+{
+	response = Map();
+	bot = Map();
+	bot.put("name","Wrike Bot");
+	bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+	response.put("bot",bot);
+	card = Map();
+	card.put("theme","poll");
+	response.put("card",card);
+	response.put("text","⚠️ Oops! Something went wrong. 😔 Please try again later");
+	return response;
+}
+return Map();
