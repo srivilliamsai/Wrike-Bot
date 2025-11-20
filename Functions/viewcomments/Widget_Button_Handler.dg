@@ -23,7 +23,7 @@ comments = invokeurl
 [
 	url :url + "?page=" + page_no
 	type :GET
-	connection:"wrike"
+	connection:"wrikeconnection"
 ];
 info comments;
 if(comments.size() == 0)
@@ -86,7 +86,7 @@ next_comments = invokeurl
 [
 	url :url + "?page=" + page_no
 	type :GET
-	connection:"wrike"
+	connection:"wrikeconnection"
 ];
 info next_comments;
 if(next_comments.size() != 0)

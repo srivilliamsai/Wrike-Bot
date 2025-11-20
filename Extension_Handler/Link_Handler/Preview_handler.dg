@@ -18,7 +18,7 @@ api_response = invokeurl
 [
 	url :api_url
 	type :GET
-	connection:"wrike"
+	connection:"wrikeconnection"
 ];
 records = api_response.get("data");
 record = Map();
@@ -35,7 +35,7 @@ else
 	[
 		url :api_url
 		type :GET
-		connection:"wrike"
+		connection:"wrikeconnection"
 	];
 	records = api_response.get("data");
 	if(records != null && records.size() != 0)

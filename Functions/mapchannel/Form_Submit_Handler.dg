@@ -43,7 +43,7 @@ webhook = invokeurl
 	type :POST
 	parameters:toString(parameters)
 	headers:headers
-	connection:"wrike"
+	connection:"wrikeconnection"
 ];
 info webhook;
 webhook_id = webhook.get("id");

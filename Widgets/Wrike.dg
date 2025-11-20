@@ -11,7 +11,7 @@ try
 		[
 			url :"https://www.wrike.com/api/v4/accounts"
 			type :GET
-			connection:"wrike"
+			connection:"wrikeconnection"
 		];
 		accounts = response.get("data");
 		if(accounts == null)
@@ -41,7 +41,7 @@ try
 		[
 			url :"https://www.wrike.com/api/v4/accounts/" + account_id + "/folders"
 			type :GET
-			connection:"wrike"
+			connection:"wrikeconnection"
 		];
 		project_list = projects.get("data");
 		if(project_list == null)
@@ -69,7 +69,7 @@ try
 		[
 			url :"https://www.wrike.com/api/v4/" + account_id + "/folders/" + project_id + ""
 			type :GET
-			connection:"wrike"
+			connection:"wrikeconnection"
 		];
 		dock = project.get("dock");
 		info dock;
@@ -86,7 +86,7 @@ try
 		[
 			url :todosets_url
 			type :GET
-			connection:"wrike"
+			connection:"wrikeconnection"
 		];
 		info todosets;
 		todolists_url = todosets.get("todolists_url");
@@ -94,7 +94,7 @@ try
 		[
 			url :todolists_url
 			type :GET
-			connection:"wrike"
+			connection:"wrikeconnection"
 		];
 		info todolists;
 		options = List();
@@ -140,7 +140,7 @@ try
 				[
 					url :"https://www.wrike.com/api/v4/" + account_id + "/folders/" + project_id + ""
 					type :GET
-					connection:"wrike"
+					connection:"wrikeconnection"
 				];
 				info project;
 				project_name = project.get("name");
@@ -209,7 +209,7 @@ try
 				[
 					url :todoset_url
 					type :GET
-					connection:"wrike"
+					connection:"wrikeconnection"
 				];
 				info todoset;
 				completed_ratio = todoset.get("completed_ratio");
@@ -234,7 +234,7 @@ try
 				[
 					url :"https://www.wrike.com/api/v4/contacts?folderId=" + project_id
 					type :GET
-					connection:"wrike"
+					connection:"wrikeconnection"
 				];
 				info peoples;
 				dataList = list();
@@ -283,7 +283,7 @@ try
 					[
 						url :todos_url
 						type :GET
-						connection:"wrike"
+						connection:"wrikeconnection"
 					];
 					info todos;
 					if(todos.size() == 0)
@@ -418,7 +418,7 @@ try
 					[
 						url :todos_url + "?page=2"
 						type :GET
-						connection:"wrike"
+						connection:"wrikeconnection"
 					];
 					info next_todos;
 					if(next_todos.size() != 0)
@@ -445,7 +445,7 @@ try
 				[
 					url :"https://www.wrike.com/api/v4/" + account_id + "/folders/" + project_id + ""
 					type :GET
-					connection:"wrike"
+					connection:"wrikeconnection"
 				];
 				info project;
 				dock = project.get("dock");
@@ -468,7 +468,7 @@ try
 				[
 					url :schedule_url
 					type :GET
-					connection:"wrike"
+					connection:"wrikeconnection"
 				];
 				info schedule;
 				entries_url = schedule.get("entries_url");
@@ -487,7 +487,7 @@ try
 				[
 					url :entries_url
 					type :GET
-					connection:"wrike"
+					connection:"wrikeconnection"
 				];
 				info entries;
 				current_entry = entries.get(0);
@@ -612,7 +612,7 @@ try
 				[
 					url :entries_url + "?page=2"
 					type :GET
-					connection:"wrike"
+					connection:"wrikeconnection"
 				];
 				info next_entries;
 				if(next_entries.size() != 0)
@@ -636,7 +636,7 @@ try
 				[
 					url :"https://www.wrike.com/api/v4/" + account_id + "/folders/" + project_id + ""
 					type :GET
-					connection:"wrike"
+					connection:"wrikeconnection"
 				];
 				info project;
 				dock = project.get("dock");
@@ -658,7 +658,7 @@ try
 				[
 					url :vault_url
 					type :GET
-					connection:"wrike"
+					connection:"wrikeconnection"
 				];
 				uploads_url = vault.get("uploads_url");
 				uploads_count = vault.get("uploads_count");
@@ -666,7 +666,7 @@ try
 				[
 					url :uploads_url
 					type :GET
-					connection:"wrike"
+					connection:"wrikeconnection"
 				];
 				info uploads;
 				if(uploads.size() == 0)
@@ -721,7 +721,7 @@ try
 				[
 					url :uploads_url + "?page=2"
 					type :GET
-					connection:"wrike"
+					connection:"wrikeconnection"
 				];
 				info next_uploads;
 				if(next_uploads.size() != 0)
@@ -745,7 +745,7 @@ try
 				[
 					url :"https://www.wrike.com/api/v4/" + account_id + "/folders/" + project_id + ""
 					type :GET
-					connection:"wrike"
+					connection:"wrikeconnection"
 				];
 				info project;
 				dock = project.get("dock");
@@ -767,7 +767,7 @@ try
 				[
 					url :vault_url
 					type :GET
-					connection:"wrike"
+					connection:"wrikeconnection"
 				];
 				documents_url = vault.get("documents_url");
 				documents_count = vault.get("documents_count");
@@ -775,7 +775,7 @@ try
 				[
 					url :documents_url
 					type :GET
-					connection:"wrike"
+					connection:"wrikeconnection"
 				];
 				info documents;
 				if(documents.size() == 0)
@@ -817,7 +817,7 @@ try
 				[
 					url :documents_url + "?page=2"
 					type :GET
-					connection:"wrike"
+					connection:"wrikeconnection"
 				];
 				info next_documents;
 				if(next_documents.size() != 0)

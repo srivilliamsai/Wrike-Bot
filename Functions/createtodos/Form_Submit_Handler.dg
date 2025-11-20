@@ -32,7 +32,7 @@ if(type == "configure")
 			[
 				url :todos_url
 				type :GET
-				connection:"wrike"
+				connection:"wrikeconnection"
 			];
 			info todos;
 			if(todos.size() == 0)
@@ -159,7 +159,7 @@ if(type == "configure")
 			[
 				url :todos_url + "?page=2"
 				type :GET
-				connection:"wrike"
+				connection:"wrikeconnection"
 			];
 			info next_todos;
 			if(next_todos.size() != 0)
@@ -218,7 +218,7 @@ todos = invokeurl
 	type :POST
 	parameters:toString(parameters)
 	headers:headers
-	connection:"wrike"
+	connection:"wrikeconnection"
 ];
 info todos;
 if(todos.containskey("app_url"))

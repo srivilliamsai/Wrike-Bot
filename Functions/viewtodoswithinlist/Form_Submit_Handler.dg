@@ -14,7 +14,7 @@ todos = invokeurl
 [
 	url :todos_url
 	type :GET
-	connection:"wrike"
+	connection:"wrikeconnection"
 ];
 info todos;
 if(todos.size() != 0)

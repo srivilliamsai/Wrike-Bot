@@ -18,7 +18,7 @@ todos = invokeurl
 [
 	url :todos_url + "?page=" + page_no
 	type :GET
-	connection:"wrike"
+	connection:"wrikeconnection"
 ];
 info todos;
 if(todos.size() == 0)
@@ -42,7 +42,7 @@ if(current_todo_url != "next_page")
 	[
 		url :current_todo_url
 		type :GET
-		connection:"wrike"
+		connection:"wrikeconnection"
 	];
 	todo_title = current_todo.get("title");
 	if(todo_title.length() >= 50)
@@ -171,7 +171,7 @@ next_todos = invokeurl
 [
 	url :todos_url + "?page=" + check_page_no
 	type :GET
-	connection:"wrike"
+	connection:"wrikeconnection"
 ];
 info next_todos;
 header = {"title":header_title,"navigation":"continue","buttons":button};

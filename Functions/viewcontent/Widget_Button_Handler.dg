@@ -44,7 +44,7 @@ if(active_tab == "Files")
 	[
 		url :url + "?page=" + page_no
 		type :GET
-		connection:"wrike"
+		connection:"wrikeconnection"
 	];
 	info uploads;
 	if(uploads.size() == 0)
@@ -93,7 +93,7 @@ if(active_tab == "Files")
 	[
 		url :url + "?page=" + page_no
 		type :GET
-		connection:"wrike"
+		connection:"wrikeconnection"
 	];
 	info next_files;
 	if(next_files.size() != 0)
@@ -112,7 +112,7 @@ else if(active_tab == "Documents")
 	[
 		url :url + "?page=" + page_no
 		type :GET
-		connection:"wrike"
+		connection:"wrikeconnection"
 	];
 	info documents;
 	if(documents.size() == 0)
@@ -148,7 +148,7 @@ else if(active_tab == "Documents")
 	[
 		url :url + "?page=" + page_no
 		type :GET
-		connection:"wrike"
+		connection:"wrikeconnection"
 	];
 	info next_documents;
 	if(next_documents.size() != 0)
@@ -167,7 +167,7 @@ if(active_tab == "view_document")
 	[
 		url :url
 		type :GET
-		connection:"wrike"
+		connection:"wrikeconnection"
 	];
 	description = "";
 	if(document.get("content") != null)
@@ -197,7 +197,7 @@ if(active_tab == "todos_url")
 	[
 		url :current_todo_url
 		type :GET
-		connection:"wrike"
+		connection:"wrikeconnection"
 	];
 	info current_todo;
 	todo_title = current_todo.get("title");

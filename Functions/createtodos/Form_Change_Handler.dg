@@ -10,7 +10,7 @@ if(target.get("name").containsIgnoreCase("todolists_url"))
 	[
 		url :todolists_url
 		type :GET
-		connection:"wrike"
+		connection:"wrikeconnection"
 	];
 	info todolists;
 	options = List();
@@ -34,7 +34,7 @@ if(target.get("name").containsIgnoreCase("todolists_url"))
 	[
 		url :"https://www.wrike.com/api/v4/contacts?accountId=" + account_id
 		type :GET
-		connection:"wrike"
+		connection:"wrikeconnection"
 	];
 	peoples = peoples_response.get("data");
 	if(peoples == null)

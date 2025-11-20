@@ -13,7 +13,7 @@ vault = invokeurl
 [
 	url :vault_url
 	type :GET
-	connection:"wrike"
+	connection:"wrikeconnection"
 ];
 info vault;
 documents_url = vault.get("documents_url");
@@ -23,7 +23,7 @@ document = invokeurl
 	type :POST
 	parameters:toString(parameters)
 	headers:headers
-	connection:"wrike"
+	connection:"wrikeconnection"
 ];
 info document;
 if(document.containskey("app_url"))

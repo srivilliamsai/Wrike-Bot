@@ -12,7 +12,7 @@ try
 			[
 				url :"https://www.wrike.com/api/v4/accounts"
 				type :GET
-				connection:"wrike"
+				connection:"wrikeconnection"
 			];
 			info response;
 			accounts = response.get("data");
@@ -85,7 +85,7 @@ try
 	[
 		url :"https://www.wrike.com/api/v4/" + account_id + "/folders"
 		type :GET
-		connection:"wrike"
+		connection:"wrikeconnection"
 	];
 	info response;
 	options = List();
@@ -113,7 +113,7 @@ try
 			[
 				url :todosets_url
 				type :GET
-				connection:"wrike"
+				connection:"wrikeconnection"
 			];
 			info todosets;
 			todolists_url = todosets.get("todolists_url");

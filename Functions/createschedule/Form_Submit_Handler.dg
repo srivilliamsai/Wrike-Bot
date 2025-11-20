@@ -15,7 +15,7 @@ schedule = invokeurl
 [
 	url :schedule_url
 	type :GET
-	connection:"wrike"
+	connection:"wrikeconnection"
 ];
 info schedule;
 entries_url = schedule.get("entries_url");
@@ -33,7 +33,7 @@ schedule_entry = invokeurl
 	type :POST
 	parameters:toString(parameters)
 	headers:headers
-	connection:"wrike"
+	connection:"wrikeconnection"
 ];
 info schedule_entry;
 if(schedule_entry.containskey("app_url"))

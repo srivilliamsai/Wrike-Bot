@@ -16,7 +16,7 @@ people_response = invokeurl
 [
 	url :"https://www.wrike.com/api/v4/contacts/" + id
 	type :GET
-	connection:"wrike"
+	connection:"wrikeconnection"
 ];
 people_list = people_response.get("data");
 people = Map();

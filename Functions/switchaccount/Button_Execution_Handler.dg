@@ -5,7 +5,7 @@ response = invokeurl
 [
 	url :"https://www.wrike.com/api/v4/accounts"
 	type :GET
-	connection:"wrike"
+	connection:"wrikeconnection"
 ];
 info response;
 accounts = response.get("data");

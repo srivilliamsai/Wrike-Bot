@@ -10,7 +10,7 @@ if(target.get("name").containsIgnoreCase("todolists_url"))
 	[
 		url :todolists_url
 		type :GET
-		connection:"wrike"
+		connection:"wrikeconnection"
 	];
 	info todolists;
 	options = List();

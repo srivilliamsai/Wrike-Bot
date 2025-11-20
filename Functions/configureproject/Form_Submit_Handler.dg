@@ -28,7 +28,7 @@ if(db.get("status").equalsIgnoreCase("SUCCESS"))
 	[
 		url :"https://www.wrike.com/api/v4/" + account_id + "/folders/" + project_id + ""
 		type :GET
-		connection:"wrike"
+		connection:"wrikeconnection"
 	];
 	info project;
 	project_name = project.get("name");
@@ -93,7 +93,7 @@ if(db.get("status").equalsIgnoreCase("SUCCESS"))
 	[
 		url :todoset_url
 		type :GET
-		connection:"wrike"
+		connection:"wrikeconnection"
 	];
 	info todoset;
 	completed_ratio = todoset.get("completed_ratio");
@@ -118,7 +118,7 @@ if(db.get("status").equalsIgnoreCase("SUCCESS"))
 	[
 		url :"https://www.wrike.com/api/v4/contacts?folderId=" + project_id
 		type :GET
-		connection:"wrike"
+		connection:"wrikeconnection"
 	];
 	info peoples;
 	dataList = list();

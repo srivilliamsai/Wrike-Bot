@@ -17,7 +17,7 @@ entries = invokeurl
 [
 	url :entries_url + "?page=" + page_no
 	type :GET
-	connection:"wrike"
+	connection:"wrikeconnection"
 ];
 info entries;
 if(entries.size() == 0)
@@ -40,7 +40,7 @@ if(current_entry_url != "next_page")
 	[
 		url :current_entry_url
 		type :GET
-		connection:"wrike"
+		connection:"wrikeconnection"
 	];
 	entry_summary = current_entry.get("summary");
 	if(entry_summary.length() >= 50)
@@ -169,7 +169,7 @@ next_entries = invokeurl
 [
 	url :entries_url + "?page=" + check_page_no
 	type :GET
-	connection:"wrike"
+	connection:"wrikeconnection"
 ];
 info next_entries;
 header = {"title":header_title,"navigation":"continue","buttons":button};

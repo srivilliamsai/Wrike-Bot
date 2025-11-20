@@ -30,7 +30,7 @@ if(get_delete_db.get("list").size() > 0)
 	[
 		url :"https://www.wrike.com/api/v4/" + account_id + "/folders/" + project_id + "/webhooks/" + webhook_id + ""
 		type :DELETE
-		connection:"wrike"
+		connection:"wrikeconnection"
 	];
 	info webhook;
 	response = Map();

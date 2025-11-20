@@ -12,7 +12,7 @@ try
 			[
 				url :"https://www.wrike.com/api/v4/accounts"
 				type :GET
-				connection:"wrike"
+				connection:"wrikeconnection"
 			];
 			info response;
 			accounts = response.get("data");
@@ -72,7 +72,7 @@ try
 		card = Map();
 		card.put("theme","modern-inline");
 		response.put("card",card);
-		response.put("text",⚠️ Oops! Something went wrong. 😔 Please try again later");
+		response.put("text","⚠️ Oops! Something went wrong. 😔 Please try again later");
 		return response;
 	}
 	query = Map();

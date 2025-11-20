@@ -7,7 +7,7 @@ api_response = invokeurl
 [
 	url :todosets_url
 	type :GET
-	connection:"wrike"
+	connection:"wrikeconnection"
 ];
 info api_response;
 todolists_url = api_response.get("todolists_url");
@@ -22,7 +22,7 @@ todolist = invokeurl
 	type :POST
 	parameters:toString(parameters)
 	headers:headers
-	connection:"wrike"
+	connection:"wrikeconnection"
 ];
 info todolist;
 if(todolist.containskey("app_url"))

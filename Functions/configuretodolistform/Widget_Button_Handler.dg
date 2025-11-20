@@ -8,7 +8,7 @@ project = invokeurl
 [
 	url :"https://www.wrike.com/api/v4/" + account_id + "/folders/" + project_id + ""
 	type :GET
-	connection:"wrike"
+	connection:"wrikeconnection"
 ];
 dock = project.get("dock");
 info dock;
@@ -25,7 +25,7 @@ todosets = invokeurl
 [
 	url :todosets_url
 	type :GET
-	connection:"wrike"
+	connection:"wrikeconnection"
 ];
 info todosets;
 todolists_url = todosets.get("todolists_url");
@@ -33,7 +33,7 @@ todolists = invokeurl
 [
 	url :todolists_url
 	type :GET
-	connection:"wrike"
+	connection:"wrikeconnection"
 ];
 info todolists;
 options = List();
