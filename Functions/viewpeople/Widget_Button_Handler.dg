@@ -98,7 +98,7 @@ can_manage_people = "❌";
 can_manage_projects = "❌";
 can_ping = "❌";
 can_access_timesheet = "❌";
-avatar_url = "https://i.imgur.com/ZSIOsEj.png";
+avatar_url = "https://i.postimg.cc/Wzq58K7J/wrikelogo.png";
 if(people.get("photo") != null)
 {
 	avatar_url = people.get("photo");

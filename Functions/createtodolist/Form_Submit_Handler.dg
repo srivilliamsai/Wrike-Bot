@@ -31,13 +31,13 @@ if(todolist.containskey("app_url"))
 	response = Map();
 	bot = Map();
 	bot.put("name","Wrike Bot");
-	bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+	bot.put("image","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 	response.put("bot",bot);
 	card = Map();
 	card.put("title","[To-do List](" + todolist.get("parent").get("app_url") + ")");
 	card.put("theme","modern-inline");
-	card.put("icon","https://i.imgur.com/ZSIOsEj.png");
-	card.put("thumbnail","https://i.imgur.com/ZSIOsEj.png");
+	card.put("icon","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
+	card.put("thumbnail","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 	response.put("card",card);
 	buttonsList = list();
 	buttonsList0 = Map();
@@ -64,7 +64,7 @@ else
 	response = Map();
 	bot = Map();
 	bot.put("name","Wrike Bot");
-	bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+	bot.put("image","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 	response.put("bot",bot);
 	card = Map();
 	card.put("theme","modern-inline");

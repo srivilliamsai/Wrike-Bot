@@ -49,11 +49,11 @@ if(active_tab == "Files")
 	info uploads;
 	if(uploads.size() == 0)
 	{
-		elements.add({"type":"activity","title":"📄 You don't have any more files 🤔","description":"","image_url":"https://i.imgur.com/ZSIOsEj.png"});
+		elements.add({"type":"activity","title":"📄 You don't have any more files 🤔","description":"","image_url":"https://i.postimg.cc/Wzq58K7J/wrikelogo.png"});
 		elements.add(dividerElement);
 		sections.add({"id":1,"elements":elements});
 		return {"type":"applet","header":header,"sections":sections,"active_tab":active_tab};
-		//return {"type":"applet","data_type":"info","tabs":tabsList,"info":{"title":"📄 You don’t have any files yet.","description":"Click here to Create.","image_url":"https://i.imgur.com/ZSIOsEj.png"},"active_tab":id};
+		//return {"type":"applet","data_type":"info","tabs":tabsList,"info":{"title":"📄 You don’t have any files yet.","description":"Click here to Create.","image_url":"https://i.postimg.cc/Wzq58K7J/wrikelogo.png"},"active_tab":id};
 	}
 	i = 1;
 	for each  upload in uploads
@@ -117,11 +117,11 @@ else if(active_tab == "Documents")
 	info documents;
 	if(documents.size() == 0)
 	{
-		elements.add({"type":"activity","title":"📄 You don't have any more documents🤔","description":"Use `/wrike Create a Document` in any Cliq chat or use the message action (select a message, click more, and then click `Create a Document`) to create your first document 📚✨","image_url":"https://i.imgur.com/ZSIOsEj.png"});
+		elements.add({"type":"activity","title":"📄 You don't have any more documents🤔","description":"Use `/wrike Create a Document` in any Cliq chat or use the message action (select a message, click more, and then click `Create a Document`) to create your first document 📚✨","image_url":"https://i.postimg.cc/Wzq58K7J/wrikelogo.png"});
 		elements.add(dividerElement);
 		sections.add({"id":1,"elements":elements});
 		return {"type":"applet","header":header,"sections":sections,"active_tab":active_tab};
-		//return {"type":"applet","data_type":"info","tabs":tabsList,"info":{"title":"📄 You don’t have any documents yet.","description":"Click here to Create.","image_url":"https://i.imgur.com/ZSIOsEj.png"},"active_tab":id};
+		//return {"type":"applet","data_type":"info","tabs":tabsList,"info":{"title":"📄 You don’t have any documents yet.","description":"Click here to Create.","image_url":"https://i.postimg.cc/Wzq58K7J/wrikelogo.png"},"active_tab":id};
 	}
 	i = 1;
 	for each  document in documents
@@ -265,7 +265,7 @@ if(active_tab == "todos_url")
 	response = Map();
 	bot = Map();
 	bot.put("name","Wrike Bot");
-	bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+	bot.put("image","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 	response.put("bot",bot);
 	card = Map();
 	card.put("theme","modern-inline");

@@ -8,7 +8,7 @@ title = "";
 folder_name = "";
 folder_id = "";
 creator_name = "";
-avatar_url = "https://i.imgur.com/ZSIOsEj.png";
+avatar_url = "https://i.postimg.cc/Wzq58K7J/wrikelogo.png";
 task_id = "";
 if(result.containsKey("eventType"))
 {
@@ -57,7 +57,7 @@ if(result.containsKey("authorAvatar"))
 response = Map();
 bot = Map();
 bot.put("name","Wrike Bot");
-bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+bot.put("image","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 response.put("bot",bot);
 card = Map();
 //card.put("title","*🔔 Notification:* " + title);

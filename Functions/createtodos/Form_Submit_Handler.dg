@@ -39,11 +39,11 @@ if(type == "configure")
 			{
 				sections = List();
 				elements = List();
-				elements.add({"type":"activity","title":"To-do List Empty! 📝","description":"You don't have any To-dos yet!\nUse `/wrike Create a To-do` in any Cliq chat or use the message action (select a message, click more, and then click `Create a To-do`) to create your first task and start organizing your day! 📅💪","image_url":"https://i.imgur.com/ZSIOsEj.png"});
+				elements.add({"type":"activity","title":"To-do List Empty! 📝","description":"You don't have any To-dos yet!\nUse `/wrike Create a To-do` in any Cliq chat or use the message action (select a message, click more, and then click `Create a To-do`) to create your first task and start organizing your day! 📅💪","image_url":"https://i.postimg.cc/Wzq58K7J/wrikelogo.png"});
 				elements.add(dividerElement);
 				sections.add({"id":1,"elements":elements});
 				return {"type":"applet","header":header,"footer":footer,"sections":sections,"tabs":tabsList,"active_tab":id};
-				//return {"type":"applet","data_type":"info","tabs":tabsList,"info":{"title":" You don’t have any todos yet.","description":"Click here to Create.","image_url":"https://i.imgur.com/ZSIOsEj.png"},"active_tab":id};
+				//return {"type":"applet","data_type":"info","tabs":tabsList,"info":{"title":" You don’t have any todos yet.","description":"Click here to Create.","image_url":"https://i.postimg.cc/Wzq58K7J/wrikelogo.png"},"active_tab":id};
 			}
 			current_todo = todos.get(0);
 			sections = List();
@@ -138,7 +138,7 @@ if(type == "configure")
 				eachData.put("title",title);
 				eachData.put("description",description);
 				eachData.put("image_url","https://i.imgur.com/McUuEPk.png");
-				eachData.put("icon_url","https://i.imgur.com/ZSIOsEj.png");
+				eachData.put("icon_url","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 				buttonList = {{"label":"Open","type":"invoke.function","name":"viewtodos","id":todo.get("url") + "|" + todos_url + "|1","emotion":"negative"}};
 				eachData.put("buttons",buttonList);
 				dataList.add(eachData);
@@ -173,7 +173,7 @@ if(type == "configure")
 				return {"type":"applet","header":header,"sections":sections,"tabs":tabsList,"active_tab":id};
 			}
 		}
-		return {"type":"applet","data_type":"info","tabs":tabsList,"info":{"title":"Your default To-do List is not configured yet!","description":"Click here to configure.","image_url":"https://i.imgur.com/ZSIOsEj.png","button":{"label":"Configure Default To-do List","type":"invoke.function","name":"configuretodolistform","emotion":"positive","id":"configuration"}},"active_tab":id};
+		return {"type":"applet","data_type":"info","tabs":tabsList,"info":{"title":"Your default To-do List is not configured yet!","description":"Click here to configure.","image_url":"https://i.postimg.cc/Wzq58K7J/wrikelogo.png","button":{"label":"Configure Default To-do List","type":"invoke.function","name":"configuretodolistform","emotion":"positive","id":"configuration"}},"active_tab":id};
 	}
 	else
 	{
@@ -227,13 +227,13 @@ if(todos.containskey("app_url"))
 	response = Map();
 	bot = Map();
 	bot.put("name","Wrike Bot");
-	bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+	bot.put("image","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 	response.put("bot",bot);
 	card = Map();
 	card.put("title","[To-do](" + todos.get("parent").get("app_url") + ")");
 	card.put("theme","modern-inline");
-	card.put("icon","https://i.imgur.com/ZSIOsEj.png");
-	card.put("thumbnail","https://i.imgur.com/ZSIOsEj.png");
+	card.put("icon","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
+	card.put("thumbnail","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 	response.put("card",card);
 	buttonsList = list();
 	buttonsList0 = Map();
@@ -272,7 +272,7 @@ else
 	response = Map();
 	bot = Map();
 	bot.put("name","Wrike Bot");
-	bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+	bot.put("image","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 	response.put("bot",bot);
 	card = Map();
 	card.put("theme","modern-inline");

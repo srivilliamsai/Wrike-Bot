@@ -34,7 +34,7 @@ try
 				response = Map();
 				bot = Map();
 				bot.put("name","Wrike Bot");
-				bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+				bot.put("image","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 				response.put("bot",bot);
 				buttonsList = list();
 				buttonsList0 = Map();
@@ -67,7 +67,7 @@ try
 		response = Map();
 		bot = Map();
 		bot.put("name","Wrike Bot");
-		bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+		bot.put("image","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 		response.put("bot",bot);
 		card = Map();
 		card.put("theme","modern-inline");
@@ -86,7 +86,7 @@ try
 		response = Map();
 		bot = Map();
 		bot.put("name","Wrike Bot");
-		bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+		bot.put("image","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 		response.put("bot",bot);
 		response.put("text","Hello [" + user.get("first_name") + "](zohoid:" + user.get("zoho_user_id") + ") 👋 \nDetails of your mapped projects");
 		card = Map();
@@ -170,7 +170,7 @@ catch (e)
 	response = Map();
 	bot = Map();
 	bot.put("name","Wrike Bot");
-	bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+	bot.put("image","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 	response.put("bot",bot);
 	card = Map();
 	card.put("title","Oops! You've Hit the Fun Limit! 🎢");

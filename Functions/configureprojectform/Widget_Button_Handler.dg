@@ -23,14 +23,14 @@ for each  project in projects
 	option = Map();
 	option.put("value",project_id);
 	option.put("label",project_name);
-	option.put("thumbnail","https://i.imgur.com/ZSIOsEj.png");
+	option.put("thumbnail","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 	options.add(option);
 }
 if(options.size() == 0)
 {
 	// no projects in account
 	elements = list();
-	elements.add({"type":"activity","title":"You don't have any projects yet! 🤔","description":"","image_url":"https://i.imgur.com/ZSIOsEj.png"});
+	elements.add({"type":"activity","title":"You don't have any projects yet! 🤔","description":"","image_url":"https://i.postimg.cc/Wzq58K7J/wrikelogo.png"});
 	sections = list();
 	sections.add({"id":1,"elements":elements});
 	header = {"title":"Project"};

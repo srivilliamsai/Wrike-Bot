@@ -5,14 +5,14 @@ if(newuser)
 {
 	card = Map();
 	card.put("title","Wrike for Zoho Cliq");
-	card.put("icon","https://i.imgur.com/ZSIOsEj.png");
+	card.put("icon","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 	card.put("theme","modern-inline");
 	response.put("card",card);
 	slidesList = list();
 	slidesList0 = Map();
 	slidesList0.put("type","images");
 	dataList = list();
-	dataList.add("https://i.imgur.com/NPcfBax.png");
+	dataList.add("https://i.postimg.cc/YCRTh5D4/banner.png");
 	slidesList0.put("data",dataList);
 	slidesList.add(slidesList0);
 	response.put("slides",slidesList);
@@ -22,14 +22,14 @@ else
 {
 	card = Map();
 	card.put("title","Wrike for Zoho Cliq");
-	card.put("icon","https://i.imgur.com/ZSIOsEj.png");
+	card.put("icon","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 	card.put("theme","modern-inline");
 	response.put("card",card);
 	slidesList = list();
 	slidesList0 = Map();
 	slidesList0.put("type","images");
 	dataList = list();
-	dataList.add("https://i.imgur.com/NPcfBax.png");
+	dataList.add("https://i.postimg.cc/YCRTh5D4/banner.png");
 	slidesList0.put("data",dataList);
 	slidesList.add(slidesList0);
 	response.put("slides",slidesList);

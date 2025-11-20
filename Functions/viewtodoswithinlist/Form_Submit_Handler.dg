@@ -22,7 +22,7 @@ if(todos.size() != 0)
 	response = Map();
 	bot = Map();
 	bot.put("name","Wrike Bot");
-	bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+	bot.put("image","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 	response.put("bot",bot);
 	card = Map();
 	card.put("title","To-do List Tasks 📋");
@@ -129,7 +129,7 @@ else
 	response = Map();
 	bot = Map();
 	bot.put("name","Wrike Bot");
-	bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+	bot.put("image","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 	response.put("bot",bot);
 	card = Map();
 	card.put("title","To-do List Empty! 📝");

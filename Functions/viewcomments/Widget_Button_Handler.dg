@@ -30,12 +30,12 @@ if(comments.size() == 0)
 {
 	sections = list();
 	elements = List();
-	elements.add({"type":"activity","title":"There are no more comments to show.","description":"","image_url":"https://i.imgur.com/ZSIOsEj.png"});
+	elements.add({"type":"activity","title":"There are no more comments to show.","description":"","image_url":"https://i.postimg.cc/Wzq58K7J/wrikelogo.png"});
 	elements.add({"type":"buttons","buttons":{add_comment_button}});
 	elements.add(dividerElement);
 	sections.add({"id":1,"elements":elements});
 	return {"type":"applet","header":header,"sections":sections,"active_tab":active_tab};
-	//return {"type":"applet","data_type":"info","info":{"title":"","description":"Click here to Add Comment.","image_url":"https://i.imgur.com/ZSIOsEj.png","button":add_comment_button},"active_tab":active_tab};
+	//return {"type":"applet","data_type":"info","info":{"title":"","description":"Click here to Add Comment.","image_url":"https://i.postimg.cc/Wzq58K7J/wrikelogo.png","button":add_comment_button},"active_tab":active_tab};
 }
 re_title = comments.get(0).get("title");
 if(re_title.length() >= 50)

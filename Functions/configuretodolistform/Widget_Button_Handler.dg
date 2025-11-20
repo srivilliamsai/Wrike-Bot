@@ -52,7 +52,7 @@ if(options.size() == 0)
 {
 	// no projects in account
 	elements = list();
-	elements.add({"type":"activity","title":"You don't have any To-do List yet! 🤔","description":"Use `/wrike Create a To-do List` in any Cliq chat to create your first To-do List and start organizing your day! 📅💪","image_url":"https://i.imgur.com/ZSIOsEj.png"});
+	elements.add({"type":"activity","title":"You don't have any To-do List yet! 🤔","description":"Use `/wrike Create a To-do List` in any Cliq chat to create your first To-do List and start organizing your day! 📅💪","image_url":"https://i.postimg.cc/Wzq58K7J/wrikelogo.png"});
 	sections = list();
 	sections.add({"id":1,"elements":elements});
 	header = {"title":"To-dos"};

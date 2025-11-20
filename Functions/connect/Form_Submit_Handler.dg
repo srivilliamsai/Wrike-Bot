@@ -21,11 +21,11 @@ if(exit_account_id != account_id)
 		response = Map();
 		bot = Map();
 		bot.put("name","Wrike Bot");
-		bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+		bot.put("image","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 		response.put("bot",bot);
 		card = Map();
 		card.put("theme","modern-inline");
-		card.put("thumbnail","https://i.imgur.com/ZSIOsEj.png");
+		card.put("thumbnail","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 		response.put("card",card);
 		response.put("text","Hey [" + user.get("first_name") + "](zohoid:" + user.get("zoho_user_id") + ") 🎉\n You've successfully switched account from " + exit_account_name + " to " + account_name);
 		return response;
@@ -35,7 +35,7 @@ if(exit_account_id != account_id)
 		response = Map();
 		bot = Map();
 		bot.put("name","Wrike Bot");
-		bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+		bot.put("image","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 		response.put("bot",bot);
 		card = Map();
 		card.put("theme","modern-inline");
@@ -49,11 +49,11 @@ else
 	response = Map();
 	bot = Map();
 	bot.put("name","Wrike Bot");
-	bot.put("image","https://i.imgur.com/ZSIOsEj.png");
+	bot.put("image","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 	response.put("bot",bot);
 	card = Map();
 	card.put("theme","modern-inline");
-	card.put("thumbnail","https://i.imgur.com/ZSIOsEj.png");
+	card.put("thumbnail","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 	response.put("card",card);
 	response.put("text","Hey [" + user.get("first_name") + "](zohoid:" + user.get("zoho_user_id") + ") 👋.\n it looks like you haven't switched accounts. You're still configured as " + account_name);
 	return response;

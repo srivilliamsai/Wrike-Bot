@@ -25,11 +25,11 @@ if(entries.size() == 0)
 	header = {"title":"page " + page_no,"navigation":"continue","buttons":button};
 	sections = List();
 	elements = List();
-	elements.add({"type":"activity","title":"You don't have any more schedules🤔","description":"Use `/wrike Create a Schedule` in any Cliq chat to create your first schedule and start organizing your day! 📅💪","image_url":"https://i.imgur.com/ZSIOsEj.png"});
+	elements.add({"type":"activity","title":"You don't have any more schedules🤔","description":"Use `/wrike Create a Schedule` in any Cliq chat to create your first schedule and start organizing your day! 📅💪","image_url":"https://i.postimg.cc/Wzq58K7J/wrikelogo.png"});
 	elements.add(dividerElement);
 	sections.add({"id":1,"elements":elements});
 	return {"type":"applet","header":header,"sections":sections,"active_tab":"Schedule"};
-	//return {"type":"applet","data_type":"info","info":{"title":" You don’t have any schedule yet.","description":"Click here to Create.","image_url":"https://i.imgur.com/ZSIOsEj.png"},"active_tab":"Schedule"};
+	//return {"type":"applet","data_type":"info","info":{"title":" You don’t have any schedule yet.","description":"Click here to Create.","image_url":"https://i.postimg.cc/Wzq58K7J/wrikelogo.png"},"active_tab":"Schedule"};
 }
 sections = List();
 elements = List();
@@ -141,7 +141,7 @@ for each  entry in entries
 	eachData.put("title",summary);
 	eachData.put("description",description);
 	eachData.put("image_url","https://i.imgur.com/N6c9bLZ.png");
-	eachData.put("icon_url","https://i.imgur.com/ZSIOsEj.png");
+	eachData.put("icon_url","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 	buttonList = {{"label":"Open","type":"invoke.function","name":"viewschedule","id":entry.get("url") + "|" + entries_url + "|" + page_no,"emotion":"negative"}};
 	eachData.put("buttons",buttonList);
 	dataList.add(eachData);
