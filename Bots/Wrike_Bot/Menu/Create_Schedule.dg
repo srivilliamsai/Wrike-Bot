@@ -159,15 +159,19 @@ catch (space_error)
 options = List();
 for each  project in projects
 	{
-		project_name = ifnull(project.get("title"),project.get("name"));
-		if(project_name == null)
-		{
-			project_name = "";
-		}
-		if(project_name != "" && project_name.length() >= 50)
-		{
-			project_name = project_name.subString(0,47) + "..";
-		}
+                project_name = ifnull(project.get("title"),project.get("name"));
+                if(project_name == null)
+                {
+                        project_name = "";
+                }
+                if(project_name == "")
+                {
+                        project_name = "Untitled Project";
+                }
+                if(project_name.length() >= 50)
+                {
+                        project_name = project_name.subString(0,47) + "..";
+                }
 		dock = project.get("dock");
 		if(dock == null)
 		{

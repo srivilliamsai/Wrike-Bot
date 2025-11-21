@@ -11,6 +11,10 @@ project = invokeurl
 	connection:"wrikeconnection"
 ];
 dock = project.get("dock");
+if(dock == null)
+{
+        dock = list();
+}
 info dock;
 tasksets_url = "";
 for each  d in dock
@@ -39,14 +43,18 @@ info tasklists;
 options = List();
 for each  tasklist in tasklists
 {
-	name = tasklist.get("name");
-	if(name.length() >= 50)
-	{
-		name = name.subString(0,47) + "..";
-	}
-	tasklist_id = tasklist.get("id");
-	option = {"label":name,"value":tasklist_id};
-	options.add(option);
+        name = ifnull(tasklist.get("name"),"");
+        if(name == "")
+        {
+                name = "Untitled Task List";
+        }
+        if(name.length() >= 50)
+        {
+                name = name.subString(0,47) + "..";
+        }
+        tasklist_id = tasklist.get("id");
+        option = {"label":name,"value":tasklist_id};
+        options.add(option);
 }
 if(options.size() == 0)
 {

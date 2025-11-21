@@ -109,8 +109,12 @@ try
 			type :GET
 			connection:"wrikeconnection"
 		];
-		dock = project.get("dock");
-		info dock;
+                dock = project.get("dock");
+                if(dock == null)
+                {
+                        dock = list();
+                }
+                info dock;
 		tasksets_url = "";
 		for each  d in dock
 		{
@@ -181,11 +185,15 @@ try
 					connection:"wrikeconnection"
 				];
 				info project;
-				project_name = ifnull(project.get("name"),"");
-				if(project_name == "")
-				{
-					project_name = "Untitled Project";
-				}
+                                project_name = ifnull(project.get("title"),project.get("name"));
+                                if(project_name == null)
+                                {
+                                        project_name = "";
+                                }
+                                if(project_name == "")
+                                {
+                                        project_name = "Untitled Project";
+                                }
 				if(project_name.length() >= 50)
 				{
 					project_name = project_name.subString(0,47) + "..";
@@ -490,8 +498,12 @@ try
 					connection:"wrikeconnection"
 				];
 				info project;
-				dock = project.get("dock");
-				info dock;
+                                dock = project.get("dock");
+                                if(dock == null)
+                                {
+                                        dock = list();
+                                }
+                                info dock;
 				schedule_url = "";
 				for each  d in dock
 				{
@@ -501,11 +513,15 @@ try
 						break;
 					}
 				}
-				project_name = ifnull(project.get("name"),"");
-				if(project_name == "")
-				{
-					project_name = "Untitled Project";
-				}
+                                project_name = ifnull(project.get("title"),project.get("name"));
+                                if(project_name == null)
+                                {
+                                        project_name = "";
+                                }
+                                if(project_name == "")
+                                {
+                                        project_name = "Untitled Project";
+                                }
 				if(project_name.length() >= 50)
 				{
 					project_name = project_name.subString(0,47) + "..";
@@ -685,8 +701,12 @@ try
 					connection:"wrikeconnection"
 				];
 				info project;
-				dock = project.get("dock");
-				info dock;
+                                dock = project.get("dock");
+                                if(dock == null)
+                                {
+                                        dock = list();
+                                }
+                                info dock;
 				vault_url = "";
 				for each  d in dock
 				{
@@ -695,11 +715,15 @@ try
 						vault_url = d.get("url");
 					}
 				}
-				project_name = ifnull(project.get("name"),"");
-				if(project_name == "")
-				{
-					project_name = "Untitled Project";
-				}
+                                project_name = ifnull(project.get("title"),project.get("name"));
+                                if(project_name == null)
+                                {
+                                        project_name = "";
+                                }
+                                if(project_name == "")
+                                {
+                                        project_name = "Untitled Project";
+                                }
 				if(project_name.length() >= 50)
 				{
 					project_name = project_name.subString(0,47) + "..";
@@ -798,8 +822,12 @@ try
 					connection:"wrikeconnection"
 				];
 				info project;
-				dock = project.get("dock");
-				info dock;
+                                dock = project.get("dock");
+                                if(dock == null)
+                                {
+                                        dock = list();
+                                }
+                                info dock;
 				vault_url = "";
 				for each  d in dock
 				{
@@ -808,11 +836,15 @@ try
 						vault_url = d.get("url");
 					}
 				}
-				project_name = ifnull(project.get("name"),"");
-				if(project_name == "")
-				{
-					project_name = "Untitled Project";
-				}
+                                project_name = ifnull(project.get("title"),project.get("name"));
+                                if(project_name == null)
+                                {
+                                        project_name = "";
+                                }
+                                if(project_name == "")
+                                {
+                                        project_name = "Untitled Project";
+                                }
 				if(project_name.length() >= 50)
 				{
 					project_name = project_name.subString(0,47) + "..";
