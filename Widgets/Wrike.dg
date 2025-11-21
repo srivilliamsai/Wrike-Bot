@@ -77,7 +77,7 @@ try
 		account_id = db.get("list").get(0).get("accountid");
 		projects = invokeurl
 		[
-			url :"https://www.wrike.com/api/v4/folders?spaceId=" + account_id
+			url :"https://www.wrike.com/api/v4/folders"
 			type :GET
 			connection:"wrikeconnection"
 		];
@@ -181,12 +181,16 @@ try
 					connection:"wrikeconnection"
 				];
 				info project;
-				project_name = project.get("name");
+				project_name = ifnull(project.get("name"),"");
+				if(project_name == "")
+				{
+					project_name = "Untitled Project";
+				}
 				if(project_name.length() >= 50)
 				{
 					project_name = project_name.subString(0,47) + "..";
 				}
-				project_description = project.get("description");
+				project_description = ifnull(project.get("description"),"");
 				if(project_description.length() >= 50)
 				{
 					project_description = project_description.subString(0,47) + "..";
@@ -497,7 +501,11 @@ try
 						break;
 					}
 				}
-				project_name = project.get("name");
+				project_name = ifnull(project.get("name"),"");
+				if(project_name == "")
+				{
+					project_name = "Untitled Project";
+				}
 				if(project_name.length() >= 50)
 				{
 					project_name = project_name.subString(0,47) + "..";
@@ -687,7 +695,11 @@ try
 						vault_url = d.get("url");
 					}
 				}
-				project_name = project.get("name");
+				project_name = ifnull(project.get("name"),"");
+				if(project_name == "")
+				{
+					project_name = "Untitled Project";
+				}
 				if(project_name.length() >= 50)
 				{
 					project_name = project_name.subString(0,47) + "..";
@@ -796,7 +808,11 @@ try
 						vault_url = d.get("url");
 					}
 				}
-				project_name = project.get("name");
+				project_name = ifnull(project.get("name"),"");
+				if(project_name == "")
+				{
+					project_name = "Untitled Project";
+				}
 				if(project_name.length() >= 50)
 				{
 					project_name = project_name.subString(0,47) + "..";

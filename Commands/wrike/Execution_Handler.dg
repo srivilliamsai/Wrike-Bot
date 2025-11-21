@@ -137,7 +137,7 @@ try
 		account_id = db.get("list").get(0).get("accountid");
 		response = invokeurl
 		[
-			url :"https://www.wrike.com/api/v4/folders?spaceId=" + account_id
+			url :"https://www.wrike.com/api/v4/folders"
 			type :GET
 			connection:"wrikeconnection"
 		];
@@ -150,11 +150,15 @@ try
 		options = List();
 		for each  project in projects
 		{
-			project_name = project.get("name");
-			if(project_name.length() >= 50)
-			{
-				project_name = project_name.subString(0,47) + "..";
-			}
+project_name = ifnull(project.get("name"),"");
+if(project_name == "")
+{
+project_name = "Untitled Project";
+}
+if(project_name.length() >= 50)
+{
+project_name = project_name.subString(0,47) + "..";
+}
 			dock = project.get("dock");
 			info dock;
 			tasksets_url = "";
@@ -216,7 +220,7 @@ try
 		account_id = db.get("list").get(0).get("accountid");
 		response = invokeurl
 		[
-			url :"https://www.wrike.com/api/v4/folders?spaceId=" + account_id
+			url :"https://www.wrike.com/api/v4/folders"
 			type :GET
 			connection:"wrikeconnection"
 		];
@@ -229,11 +233,15 @@ try
 		options = List();
 		for each  project in projects
 		{
-			project_name = project.get("name");
-			if(project_name.length() >= 50)
-			{
-				project_name = project_name.subString(0,47) + "..";
-			}
+project_name = ifnull(project.get("name"),"");
+if(project_name == "")
+{
+project_name = "Untitled Project";
+}
+if(project_name.length() >= 50)
+{
+project_name = project_name.subString(0,47) + "..";
+}
 			dock = project.get("dock");
 			info dock;
 			tasksets_url = "";
@@ -295,7 +303,7 @@ try
 		account_id = db.get("list").get(0).get("accountid");
 		response = invokeurl
 		[
-			url :"https://www.wrike.com/api/v4/folders?spaceId=" + account_id
+			url :"https://www.wrike.com/api/v4/folders"
 			type :GET
 			connection:"wrikeconnection"
 		];
@@ -308,11 +316,15 @@ try
 		options = List();
 		for each  project in projects
 		{
-			project_name = project.get("name");
-			if(project_name.length() >= 50)
-			{
-				project_name = project_name.subString(0,47) + "..";
-			}
+project_name = ifnull(project.get("name"),"");
+if(project_name == "")
+{
+project_name = "Untitled Project";
+}
+if(project_name.length() >= 50)
+{
+project_name = project_name.subString(0,47) + "..";
+}
 			dock = project.get("dock");
 			info dock;
 			tasksets_url = "";
@@ -368,7 +380,7 @@ try
 		account_id = db.get("list").get(0).get("accountid");
 		response = invokeurl
 		[
-			url :"https://www.wrike.com/api/v4/folders?spaceId=" + account_id
+			url :"https://www.wrike.com/api/v4/folders"
 			type :GET
 			connection:"wrikeconnection"
 		];
@@ -381,11 +393,15 @@ try
 		options = List();
 		for each  project in projects
 		{
-			project_name = project.get("name");
-			if(project_name.length() >= 50)
-			{
-				project_name = project_name.subString(0,47) + "..";
-			}
+project_name = ifnull(project.get("name"),"");
+if(project_name == "")
+{
+project_name = "Untitled Project";
+}
+if(project_name.length() >= 50)
+{
+project_name = project_name.subString(0,47) + "..";
+}
 			dock = project.get("dock");
 			info dock;
 			schedule_url = "";
@@ -484,7 +500,7 @@ try
 		account_id = db.get("list").get(0).get("accountid");
 		projects = invokeurl
 		[
-			url :"https://www.wrike.com/api/v4/folders?spaceId=" + account_id
+			url :"https://www.wrike.com/api/v4/folders"
 			type :GET
 			connection:"wrikeconnection"
 		];
@@ -492,11 +508,15 @@ try
 		options = List();
 		for each  project in projects
 		{
-			project_name = project.get("name");
-			if(project_name.length() >= 50)
-			{
-				project_name = project_name.subString(0,47) + "..";
-			}
+project_name = ifnull(project.get("name"),"");
+if(project_name == "")
+{
+project_name = "Untitled Project";
+}
+if(project_name.length() >= 50)
+{
+project_name = project_name.subString(0,47) + "..";
+}
 			project_url = project.get("url");
 			option = Map();
 			option.put("value",project_url.replaceAll("/","-"));
@@ -542,7 +562,7 @@ try
 		account_id = db.get("list").get(0).get("accountid");
 		projects = invokeurl
 		[
-			url :"https://www.wrike.com/api/v4/folders?spaceId=" + account_id
+			url :"https://www.wrike.com/api/v4/folders"
 			type :GET
 			connection:"wrikeconnection"
 		];
@@ -550,11 +570,15 @@ try
 		options = List();
 		for each  project in projects
 		{
-			project_name = project.get("name");
-			if(project_name.length() >= 50)
-			{
-				project_name = project_name.subString(0,47) + "..";
-			}
+project_name = ifnull(project.get("name"),"");
+if(project_name == "")
+{
+project_name = "Untitled Project";
+}
+if(project_name.length() >= 50)
+{
+project_name = project_name.subString(0,47) + "..";
+}
 			dock = project.get("dock");
 			info dock;
 			vault_url = "";

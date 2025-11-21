@@ -28,7 +28,7 @@ else
 }
 projects = invokeurl
 [
-	url :"https://www.wrike.com/api/v4/folders?spaceId=" + account_id
+	url :"https://www.wrike.com/api/v4/folders"
 	type :GET
 	connection:"wrikeconnection"
 ];
@@ -43,7 +43,11 @@ for each  project in projects
 	if(db_channelmapping.get("list").size() == 0)
 	{
 		// allow only if mapping not exist
-		project_name = project.get("name");
+		project_name = ifnull(project.get("name"),"");
+		if(project_name == "")
+		{
+			project_name = "Untitled Project";
+		}
 		if(project_name.length() >= 50)
 		{
 			project_name = project_name.subString(0,47) + "..";

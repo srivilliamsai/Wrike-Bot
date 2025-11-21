@@ -31,11 +31,15 @@ if(db.get("status").equalsIgnoreCase("SUCCESS"))
 		connection:"wrikeconnection"
 	];
 	info project;
-	project_name = project.get("name");
-	if(project_name.length() >= 50)
-	{
-		project_name = project_name.subString(0,47) + "..";
-	}
+project_name = ifnull(project.get("name"),"");
+if(project_name == "")
+{
+project_name = "Untitled Project";
+}
+if(project_name.length() >= 50)
+{
+project_name = project_name.subString(0,47) + "..";
+}
 	project_description = project.get("description");
 	project_status = project.get("status");
 	project_status_emoji = "🟢";
