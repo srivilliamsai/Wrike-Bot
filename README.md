@@ -30,7 +30,7 @@ The extension stores minimal configuration in three Zoho Cliq databases. Create 
 | `accountid` | Text | ✅ | ❌ | ❌ | Wrike account id, e.g. `IEAGV6SC` |
 | `accountname` | Text | ✅ | ❌ | ❌ | Friendly name, e.g. `Wrike Demo Workspace` |
 | `projectid` | Text | ✅ | ❌ | ❌ | Default Wrike folder id (`0` when unset) |
-| `todolistid` | Text | ✅ | ❌ | ❌ | Default Wrike to-do list id (`0` when unset) |
+| `tasklistid` | Text | ✅ | ❌ | ❌ | Default Wrike task list id (`0` when unset) |
 
 This table powers onboarding, command menus, widgets, and the scheduler.
 

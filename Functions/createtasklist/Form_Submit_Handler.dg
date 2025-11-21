@@ -1,47 +1,47 @@
 
 form_data = form.get("values");
-todosets_url = form_data.get("todosets_url").get("value").replaceAll("-","/");
+tasksets_url = form_data.get("tasksets_url").get("value").replaceAll("-","/");
 name = form_data.get("name").replaceAll("\n"," ").replaceAll("\t"," ").replaceAll("\r"," ");
 description = form_data.get("description").replaceAll("\n","<br>").replaceAll("\t"," ").replaceAll("\r"," ");
 api_response = invokeurl
 [
-	url :todosets_url
+	url :tasksets_url
 	type :GET
 	connection:"wrikeconnection"
 ];
 info api_response;
-todolists_url = api_response.get("todolists_url");
+tasklists_url = api_response.get("tasklists_url");
 parameters = Map();
 parameters.put("name",name);
 parameters.put("description",description);
 headers = Map();
 headers.put("Content-Type","application/json");
-todolist = invokeurl
+tasklist = invokeurl
 [
-	url :todolists_url
+	url :tasklists_url
 	type :POST
 	parameters:toString(parameters)
 	headers:headers
 	connection:"wrikeconnection"
 ];
-info todolist;
-if(todolist.containskey("app_url"))
+info tasklist;
+if(tasklist.containskey("app_url"))
 {
-	app_url = todolist.get("app_url");
+	app_url = tasklist.get("app_url");
 	response = Map();
 	bot = Map();
 	bot.put("name","Wrike Bot");
 	bot.put("image","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 	response.put("bot",bot);
 	card = Map();
-	card.put("title","[To-do List](" + todolist.get("parent").get("app_url") + ")");
+	card.put("title","[Task List](" + tasklist.get("parent").get("app_url") + ")");
 	card.put("theme","modern-inline");
 	card.put("icon","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 	card.put("thumbnail","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 	response.put("card",card);
 	buttonsList = list();
 	buttonsList0 = Map();
-	buttonsList0.put("label","View To-do List");
+	buttonsList0.put("label","View Task List");
 	buttonsList0.put("type","+");
 	action = Map();
 	action.put("type","open.url");
@@ -55,8 +55,8 @@ if(todolist.containskey("app_url"))
 	query.put("criteria","userid=" + user.get("id"));
 	db = zoho.cliq.getRecords("wrikedb",query);
 	account_id = db.get("list").get(0).get("accountid");
-	project_url = "https://www.wrike.com/open.htm?id=" + todolist.get("folder").get("id");
-	response.put("text","Hey [" + user.get("first_name") + "](zohoid:" + user.get("zoho_user_id") + ") 👋 \nProject Name: [" + todolist.get("folder").get("name") + "](" + project_url + ") \n\nYou've successfully created the To-do List : " + name + ". Great job!");
+	project_url = "https://www.wrike.com/open.htm?id=" + tasklist.get("folder").get("id");
+	response.put("text","Hey [" + user.get("first_name") + "](zohoid:" + user.get("zoho_user_id") + ") 👋 \nProject Name: [" + tasklist.get("folder").get("name") + "](" + project_url + ") \n\nYou've successfully created the Task List : " + name + ". Great job!");
 	return response;
 }
 else

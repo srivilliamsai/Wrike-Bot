@@ -89,7 +89,7 @@ try
 				values.put("accountid",account_id);
 				values.put("accountname",account_name);
 				values.put("projectid","0");
-				values.put("todolistid","0");
+				values.put("tasklistid","0");
 				db = zoho.cliq.createRecord("wrikedb",values);
 				info db;
 			}
@@ -135,19 +135,19 @@ for each  project in projects
 		}
 		dock = project.get("dock");
 		info dock;
-		todosets_url = "";
+		tasksets_url = "";
 		for each  d in dock
 		{
-			if(d.get("name") == "todoset")
+			if(d.get("name") == "taskset")
 			{
-				todosets_url = d.get("url");
+				tasksets_url = d.get("url");
 				break;
 			}
 		}
-		if(todosets_url != "")
+		if(tasksets_url != "")
 		{
 			option = Map();
-			option.put("value",todosets_url.replaceAll("/","-"));
+			option.put("value",tasksets_url.replaceAll("/","-"));
 			option.put("label",project_name);
 			option.put("thumbnail","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 			options.add(option);
@@ -176,10 +176,10 @@ for each  project in projects
 		return response;
 	}
 	inputs = list();
-	inputs.add({"name":"todosets_url","label":"Project name","placeholder":"Choose a Project","multiple":false,"mandatory":true,"type":"dynamic_select","options":options});
-	inputs.add({"label":"Name","name":"name","placeholder":"To-do List Name","min_length":"0","max_length":"60","mandatory":true,"type":"text"});
+	inputs.add({"name":"tasksets_url","label":"Project name","placeholder":"Choose a Project","multiple":false,"mandatory":true,"type":"dynamic_select","options":options});
+	inputs.add({"label":"Name","name":"name","placeholder":"Task List Name","min_length":"0","max_length":"60","mandatory":true,"type":"text"});
 	inputs.add({"label":"Description","name":"description","placeholder":"Add extra details","min_length":"0","max_length":"200","mandatory":false,"type":"textarea"});
-	form = {"type":"form","title":"Create a To-do List 📋","name":"form","version":1,"button_label":"Create","actions":{"submit":{"type":"invoke.function","name":"createtodolist"}},"inputs":inputs};
+	form = {"type":"form","title":"Create a Task List 📋","name":"form","version":1,"button_label":"Create","actions":{"submit":{"type":"invoke.function","name":"createtasklist"}},"inputs":inputs};
 	return form;
 }
 catch (e)

@@ -12,7 +12,7 @@ if(old_project_id == project_id)
 record_id = db_query.get("list").get(0).get("id");
 values = Map();
 values.put("projectid",project_id);
-values.put("todolistid",0);
+values.put("tasklistid",0);
 db = zoho.cliq.updateRecord("wrikedb",record_id,values);
 if(db.get("status").equalsIgnoreCase("SUCCESS"))
 {
@@ -23,7 +23,7 @@ if(db.get("status").equalsIgnoreCase("SUCCESS"))
 	dividerElement = {"type":"divider"};
 	footer_text = "";
 	editDefaultProject = {"label":"Edit Default Project","emotion":"positive","type":"invoke.function","name":"configureprojectform","id":id};
-	tabsList = {{"label":"Project","id":"Project"},{"label":"To-dos","id":"To-dos"},{"label":"Schedule","id":"Schedule"},{"label":"Files","id":"Files"},{"label":"Documents","id":"Documents"}};
+	tabsList = {{"label":"Project","id":"Project"},{"label":"Tasks","id":"Tasks"},{"label":"Schedule","id":"Schedule"},{"label":"Files","id":"Files"},{"label":"Documents","id":"Documents"}};
 	project = invokeurl
 	[
 		url :"https://www.wrike.com/api/v4/folders/" + project_id + ""
@@ -83,35 +83,35 @@ if(db.get("status").equalsIgnoreCase("SUCCESS"))
 	docks = project.get("dock");
 	for each  dock in docks
 	{
-		if(dock.get("name") == "todoset")
+		if(dock.get("name") == "taskset")
 		{
-			todoset_url = dock.get("url");
+			taskset_url = dock.get("url");
 			break;
 		}
 	}
-	todoset = invokeurl
+	taskset = invokeurl
 	[
-		url :todoset_url
+		url :taskset_url
 		type :GET
 		connection:"wrikeconnection"
 	];
-	info todoset;
-	completed_ratio = todoset.get("completed_ratio");
+	info taskset;
+	completed_ratio = taskset.get("completed_ratio");
 	info completed_ratio;
 	splitIndex = completed_ratio.indexOf("/");
 	num = completed_ratio.subString(0,splitIndex).toNumber();
 	den = completed_ratio.subString(splitIndex + 1,completed_ratio.length()).toNumber();
 	if(num == 0 || den == 0)
 	{
-		todoset_ratio = 0;
+		taskset_ratio = 0;
 	}
 	else
 	{
-		todoset_ratio = (num * 100) / den;
+		taskset_ratio = (num * 100) / den;
 	}
-	todoset_data = {{"label":"Completed","value":todoset_ratio},{"label":"Pending","value":100 - todoset_ratio}};
-	elements3.add({"type":"text","text":"To-do Accomplishment Ratio"});
-	elements3.add({"type":"percentage_chart","styles":{"preview":"semi_doughnut"},"data":todoset_data});
+	taskset_data = {{"label":"Completed","value":taskset_ratio},{"label":"Pending","value":100 - taskset_ratio}};
+	elements3.add({"type":"text","text":"Task Accomplishment Ratio"});
+	elements3.add({"type":"percentage_chart","styles":{"preview":"semi_doughnut"},"data":taskset_data});
 	elements3.add(dividerElement);
 	sections.add({"id":3,"elements":elements3});
 	peoples = invokeurl

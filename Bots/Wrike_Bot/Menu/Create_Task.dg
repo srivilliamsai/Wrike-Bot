@@ -89,7 +89,7 @@ try
 				values.put("accountid",account_id);
 				values.put("accountname",account_name);
 				values.put("projectid","0");
-				values.put("todolistid","0");
+				values.put("tasklistid","0");
 				db = zoho.cliq.createRecord("wrikedb",values);
 				info db;
 			}
@@ -135,27 +135,27 @@ for each  project in projects
 		}
 		dock = project.get("dock");
 		info dock;
-		todosets_url = "";
+		tasksets_url = "";
 		for each  d in dock
 		{
-			if(d.get("name") == "todoset")
+			if(d.get("name") == "taskset")
 			{
-				todosets_url = d.get("url");
+				tasksets_url = d.get("url");
 				break;
 			}
 		}
-		if(todosets_url != "")
+		if(tasksets_url != "")
 		{
-			todosets = invokeurl
+			tasksets = invokeurl
 			[
-				url :todosets_url
+				url :tasksets_url
 				type :GET
 				connection:"wrikeconnection"
 			];
-			info todosets;
-			todolists_url = todosets.get("todolists_url");
+			info tasksets;
+			tasklists_url = tasksets.get("tasklists_url");
 			option = Map();
-			option.put("value",todolists_url.replaceAll("/","-"));
+			option.put("value",tasklists_url.replaceAll("/","-"));
 			option.put("label",project_name);
 			option.put("thumbnail","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 			options.add(option);
@@ -184,8 +184,8 @@ for each  project in projects
 		return response;
 	}
 	inputs = list();
-	inputs.add({"name":"todolists_url","label":"Project name","placeholder":"Choose a Project","trigger_on_change":true,"multiple":false,"mandatory":true,"type":"dynamic_select","options":options});
-	form = {"type":"form","title":"Create a To-do ✅","name":"form","hint":"Note 📝: You need a To-do List to create and proceed with To-dos in the project. Use \"/wrike create a To-do list\" command to set up a To-do list.","version":1,"button_label":"Create","actions":{"submit":{"type":"invoke.function","name":"createtaks"}},"inputs":inputs};
+	inputs.add({"name":"tasklists_url","label":"Project name","placeholder":"Choose a Project","trigger_on_change":true,"multiple":false,"mandatory":true,"type":"dynamic_select","options":options});
+	form = {"type":"form","title":"Create a Task ✅","name":"form","hint":"Note 📝: You need a Task List to create and proceed with Tasks in the project. Use \"/wrike create a Task list\" command to set up a Task list.","version":1,"button_label":"Create","actions":{"submit":{"type":"invoke.function","name":"createtasks"}},"inputs":inputs};
 	return form;
 }
 catch (e)

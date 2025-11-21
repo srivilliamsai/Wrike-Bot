@@ -1,32 +1,32 @@
 
 actions = list();
 response = Map();
-if(target.get("name").containsIgnoreCase("todolists_url"))
+if(target.get("name").containsIgnoreCase("tasklists_url"))
 {
-	todolists_url = form.get("values").get("todolists_url").get("value").replaceAll("-","/");
+	tasklists_url = form.get("values").get("tasklists_url").get("value").replaceAll("-","/");
 	is_message_action = form.get("values").get("is_message_action");
 	info is_message_action;
-	todolists = invokeurl
+	tasklists = invokeurl
 	[
-		url :todolists_url
+		url :tasklists_url
 		type :GET
 		connection:"wrikeconnection"
 	];
-	info todolists;
+	info tasklists;
 	options = List();
-	for each  todolist in todolists
+	for each  tasklist in tasklists
 	{
-		name = todolist.get("name");
+		name = tasklist.get("name");
 		if(name.length() >= 50)
 		{
 			name = name.subString(0,47) + "..";
 		}
-		todos_url = todolist.get("todos_url");
-		option = {"label":name,"value":todos_url.replaceAll("/","-")};
+		tasks_url = tasklist.get("tasks_url");
+		option = {"label":name,"value":tasks_url.replaceAll("/","-")};
 		options.add(option);
 	}
 	info options;
-	actions.add({"type":"add_after","name":"todolists_url","input":{"type":"dynamic_select","name":"todos_url","label":"To-do List","placeholder":"Choose a task To-do List","mandatory":true,"options":options}});
+	actions.add({"type":"add_after","name":"tasklists_url","input":{"type":"dynamic_select","name":"tasks_url","label":"Task List","placeholder":"Choose a task Task List","mandatory":true,"options":options}});
 	return {"type":"form_modification","actions":actions};
 }
 return Map();

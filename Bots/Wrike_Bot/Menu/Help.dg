@@ -15,7 +15,7 @@ slidesList0.put("data",dataList);
 slidesList.add(slidesList0);
 slidesList1 = Map();
 slidesList1.put("type","text");
-slidesList1.put("data","*Project:* Visualize using __Wrike widget__ to stay tuned with current status, accomplishment ratio, project people info, etc.\n\n### Wrike Task Reminder 🗓️: \nA daily notifier for __due tasks__, ensuring you stay on top of your to-do lists and deadlines.\n\n### Link Handlers🔗: \nAutomatically expand all __Wrike links__ shared in any Zoho Cliq chat to display richer data, providing more context and information at a glance.\n\n*Switch Account:* switch your Wrike account.\n");
+slidesList1.put("data","*Project:* Visualize using __Wrike widget__ to stay tuned with current status, accomplishment ratio, project people info, etc.\n\n### Wrike Task Reminder 🗓️: \nA daily notifier for __due tasks__, ensuring you stay on top of your task lists and deadlines.\n\n### Link Handlers🔗: \nAutomatically expand all __Wrike links__ shared in any Zoho Cliq chat to display richer data, providing more context and information at a glance.\n\n*Switch Account:* switch your Wrike account.\n");
 buttonsList1 = list();
 // switch account 
 buttonsList0 = Map();

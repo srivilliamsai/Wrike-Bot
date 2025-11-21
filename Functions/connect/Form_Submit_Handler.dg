@@ -12,9 +12,9 @@ values = Map();
 values.put("accountid",account_id);
 values.put("accountname",account_name);
 				values.put("projectid","0");
-				values.put("todolistid","0");
+				values.put("tasklistid","0");
 values.put("projectid",0);
-values.put("todolistid",0);
+values.put("tasklistid",0);
 db = zoho.cliq.updateRecord("wrikedb",record_id,values);
 if(exit_account_id != account_id)
 {

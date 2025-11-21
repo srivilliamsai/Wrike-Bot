@@ -6,8 +6,8 @@ if(db.get("status") == "SUCCESS" && db.get("list").size() != 0)
 {
 	account_id = db.get("list").get(0).get("accountid");
 	project_id = db.get("list").get(0).get("projectid");
-	todolist_id = db.get("list").get(0).get("todolistid");
-	if(account_id != 0 && project_id != 0 && todolist_id != 0)
+	tasklist_id = db.get("list").get(0).get("tasklistid");
+	if(account_id != 0 && project_id != 0 && tasklist_id != 0)
 	{
 		info "configured";
 		i = 0;
@@ -21,7 +21,7 @@ if(db.get("status") == "SUCCESS" && db.get("list").size() != 0)
 		card.put("theme","modern-inline");
 		response.put("card",card);
 		slidesList = list();
-		tasks_url = "https://www.wrike.com/api/v4/tasks?folderId=" + todolist_id + "&dueDate=today&status=Active";
+		tasks_url = "https://www.wrike.com/api/v4/tasks?folderId=" + tasklist_id + "&dueDate=today&status=Active";
 		tasks_response = invokeurl
 		[
 			url :tasks_url

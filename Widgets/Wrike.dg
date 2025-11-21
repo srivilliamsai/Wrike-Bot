@@ -64,7 +64,7 @@ try
 		values.put("accountid",account_id);
 		values.put("accountname",account_name);
 				values.put("projectid","0");
-				values.put("todolistid","0");
+				values.put("tasklistid","0");
 		db = zoho.cliq.createRecord("wrikedb",values);
 		info db;
 	}
@@ -96,9 +96,9 @@ try
 			break;
 		}
 	}
-	// confiure default to-do list
+	// confiure default task list
 	db = zoho.cliq.getRecords("wrikedb",query);
-	if(db.get("list").get(0).get("projectid") != 0 && db.get("list").get(0).get("todolistid") == 0)
+	if(db.get("list").get(0).get("projectid") != 0 && db.get("list").get(0).get("tasklistid") == 0)
 	{
 		record_id = db.get("list").get(0).get("id");
 		account_id = db.get("list").get(0).get("accountid");
@@ -111,37 +111,37 @@ try
 		];
 		dock = project.get("dock");
 		info dock;
-		todosets_url = "";
+		tasksets_url = "";
 		for each  d in dock
 		{
-			if(d.get("name") == "todoset")
+			if(d.get("name") == "taskset")
 			{
-				todosets_url = d.get("url");
+				tasksets_url = d.get("url");
 				break;
 			}
 		}
-		todosets = invokeurl
+		tasksets = invokeurl
 		[
-			url :todosets_url
+			url :tasksets_url
 			type :GET
 			connection:"wrikeconnection"
 		];
-		info todosets;
-		todolists_url = todosets.get("todolists_url");
-		todolists = invokeurl
+		info tasksets;
+		tasklists_url = tasksets.get("tasklists_url");
+		tasklists = invokeurl
 		[
-			url :todolists_url
+			url :tasklists_url
 			type :GET
 			connection:"wrikeconnection"
 		];
-		info todolists;
+		info tasklists;
 		options = List();
-		for each  todolist in todolists
+		for each  tasklist in tasklists
 		{
-			name = todolist.get("name");
-			todolist_id = todolist.get("id");
+			name = tasklist.get("name");
+			tasklist_id = tasklist.get("id");
 			values = Map();
-			values.put("todolistid",todolist_id);
+			values.put("tasklistid",tasklist_id);
 			db = zoho.cliq.updateRecord("wrikedb",record_id,values);
 			info db;
 			break;
@@ -161,7 +161,7 @@ try
 	footer = {"text":""};
 	footer_text = "";
 	editDefaultProject = {"label":"Edit Default Project","emotion":"positive","type":"invoke.function","name":"configureprojectform","id":id};
-	tabsList = {{"label":"Project","id":"Project"},{"label":"To-dos","id":"To-dos"},{"label":"Schedule","id":"Schedule"},{"label":"Files","id":"Files"},{"label":"Documents","id":"Documents"}};
+	tabsList = {{"label":"Project","id":"Project"},{"label":"Tasks","id":"Tasks"},{"label":"Schedule","id":"Schedule"},{"label":"Files","id":"Files"},{"label":"Documents","id":"Documents"}};
 	//query = Map();
 	//query.put("criteria","userid=" + user.get("id"));
 	db = zoho.cliq.getRecords("wrikedb",query);
@@ -237,35 +237,35 @@ try
 				docks = project.get("dock");
 				for each  dock in docks
 				{
-					if(dock.get("name") == "todoset")
+					if(dock.get("name") == "taskset")
 					{
-						todoset_url = dock.get("url");
+						taskset_url = dock.get("url");
 						break;
 					}
 				}
-				todoset = invokeurl
+				taskset = invokeurl
 				[
-					url :todoset_url
+					url :taskset_url
 					type :GET
 					connection:"wrikeconnection"
 				];
-				info todoset;
-				completed_ratio = todoset.get("completed_ratio");
+				info taskset;
+				completed_ratio = taskset.get("completed_ratio");
 				info completed_ratio;
 				splitIndex = completed_ratio.indexOf("/");
 				num = completed_ratio.subString(0,splitIndex).toNumber();
 				den = completed_ratio.subString(splitIndex + 1,completed_ratio.length()).toNumber();
 				if(num == 0 || den == 0)
 				{
-					todoset_ratio = 0;
+					taskset_ratio = 0;
 				}
 				else
 				{
-					todoset_ratio = (num * 100) / den;
+					taskset_ratio = (num * 100) / den;
 				}
-				todoset_data = {{"label":"Completed","value":todoset_ratio},{"label":"Pending","value":100 - todoset_ratio}};
-				elements3.add({"type":"text","text":"To-do Accomplishment Ratio"});
-				elements3.add({"type":"percentage_chart","styles":{"preview":"semi_doughnut"},"data":todoset_data});
+				taskset_data = {{"label":"Completed","value":taskset_ratio},{"label":"Pending","value":100 - taskset_ratio}};
+				elements3.add({"type":"text","text":"Task Accomplishment Ratio"});
+				elements3.add({"type":"percentage_chart","styles":{"preview":"semi_doughnut"},"data":taskset_data});
 				elements3.add(dividerElement);
 				sections.add({"id":3,"elements":elements3});
 				peoples = invokeurl
@@ -307,50 +307,50 @@ try
 				header = {"title":project_name,"navigation":"new","buttons":button};
 				return {"type":"applet","header":header,"sections":sections,"tabs":tabsList,"active_tab":id};
 			}
-			else if(id == "To-dos")
+			else if(id == "Tasks")
 			{
-				todolist_id = db.get("list").get(0).get("todolistid");
-				if(todolist_id != 0)
+				tasklist_id = db.get("list").get(0).get("tasklistid");
+				if(tasklist_id != 0)
 				{
 					button = List();
 					button.add(editDefaultProject);
-					button.add({"label":"Edit Default To-do List","type":"invoke.function","name":"configuretodolistform","emotion":"positive","id":"configuration"});
-					header = {"title":"To-dos (page 1)","navigation":"new","buttons":button};
-					todos_url = "https://www.wrike.com/api/v4/folders/" + todolist_id + "/tasks";
-					todos = invokeurl
+					button.add({"label":"Edit Default Task List","type":"invoke.function","name":"configuretasklistform","emotion":"positive","id":"configuration"});
+					header = {"title":"Tasks (page 1)","navigation":"new","buttons":button};
+					tasks_url = "https://www.wrike.com/api/v4/folders/" + tasklist_id + "/tasks";
+					tasks = invokeurl
 					[
-						url :todos_url
+						url :tasks_url
 						type :GET
 						connection:"wrikeconnection"
 					];
-					info todos;
-					if(todos.size() == 0)
+					info tasks;
+					if(tasks.size() == 0)
 					{
 						sections = List();
 						elements = List();
-						elements.add({"type":"activity","title":"To-do List Empty! 📝","description":"You don't have any To-dos yet!\nUse `/wrike Create a To-do` in any Cliq chat or use the message action (select a message, click more, and then click `Create a To-do`) to create your first task and start organizing your day! 📅💪","image_url":"https://i.postimg.cc/Wzq58K7J/wrikelogo.png"});
+						elements.add({"type":"activity","title":"Task List Empty! 📝","description":"You don't have any Tasks yet!\nUse `/wrike Create a Task` in any Cliq chat or use the message action (select a message, click more, and then click `Create a Task`) to create your first task and start organizing your day! 📅💪","image_url":"https://i.postimg.cc/Wzq58K7J/wrikelogo.png"});
 						elements.add(dividerElement);
 						sections.add({"id":1,"elements":elements});
 						return {"type":"applet","header":header,"footer":footer,"sections":sections,"tabs":tabsList,"active_tab":id};
-						//return {"type":"applet","data_type":"info","tabs":tabsList,"info":{"title":" You don’t have any todos yet.","description":"Click here to Create.","image_url":"https://i.postimg.cc/Wzq58K7J/wrikelogo.png"},"active_tab":id};
+						//return {"type":"applet","data_type":"info","tabs":tabsList,"info":{"title":" You don’t have any tasks yet.","description":"Click here to Create.","image_url":"https://i.postimg.cc/Wzq58K7J/wrikelogo.png"},"active_tab":id};
 					}
-					current_todo = todos.get(0);
+					current_task = tasks.get(0);
 					sections = List();
 					elements = List();
-					todo_title = current_todo.get("title");
-					if(todo_title.length() >= 50)
+					task_title = current_task.get("title");
+					if(task_title.length() >= 50)
 					{
-						todo_title = todo_title.subString(0,47) + "..";
+						task_title = task_title.subString(0,47) + "..";
 					}
-					creator_name = current_todo.get("creator").get("name");
+					creator_name = current_task.get("creator").get("name");
 					if(creator_name.length() >= 20)
 					{
 						creator_name = creator_name.subString(0,18) + "..";
 					}
 					description = "";
-					if(current_todo.get("description") != null)
+					if(current_task.get("description") != null)
 					{
-						description = current_todo.get("description");
+						description = current_task.get("description");
 					}
 					description = description.replaceAll("&lt;","<").replaceAll("&gt;",">").replaceAll("&amp;","&");
 					description = description.replaceAll("<br>","\n");
@@ -360,35 +360,35 @@ try
 					{
 						description = description.subString(0,198) + "..";
 					}
-					starts_on = current_todo.get("starts_on");
+					starts_on = current_task.get("starts_on");
 					if(starts_on == null)
 					{
 						starts_on = "-";
 					}
 					starts_on = starts_on.replaceAll("T"," ").subString(0,starts_on.lastIndexOf(":"));
-					due_on = current_todo.get("due_on");
+					due_on = current_task.get("due_on");
 					if(due_on == null)
 					{
 						due_on = "-";
 					}
 					due_on = due_on.replaceAll("T"," ").subString(0,due_on.lastIndexOf(":"));
-					created_at = current_todo.get("created_at");
+					created_at = current_task.get("created_at");
 					if(created_at == null)
 					{
 						created_at = "-";
 					}
 					created_at = created_at.replaceAll("T"," ").subString(0,created_at.lastIndexOf(":"));
 					completed_emoji = "✖️";
-					if(current_todo.get("completed") == true)
+					if(current_task.get("completed") == true)
 					{
 						completed_emoji = "✔️";
 					}
-					elements.add({"type":"title","text":todo_title});
+					elements.add({"type":"title","text":task_title});
 					elements.add({"type":"text","text":description});
-					elements.add({"type":"buttons","buttons":{{"label":"View Comments","emotion":"negative","type":"invoke.function","name":"viewcomments","id":id + "|" + current_todo.get("comments_url") + "|1"},{"label":"View","emotion":"positive","type":"open.url","url":current_todo.get("app_url")}}});
+					elements.add({"type":"buttons","buttons":{{"label":"View Comments","emotion":"negative","type":"invoke.function","name":"viewcomments","id":id + "|" + current_task.get("comments_url") + "|1"},{"label":"View","emotion":"positive","type":"open.url","url":current_task.get("app_url")}}});
 					elements.add(dividerElement);
 					assignees_name = "";
-					assignees = current_todo.get("assignees");
+					assignees = current_task.get("assignees");
 					info assignees;
 					for each  assignee in assignees
 					{
@@ -399,13 +399,13 @@ try
 						assignees_name = assignees_name.substring(0,assignees_name.length() - 1);
 					}
 					elements.add({"type":"fields","data":{{"Completed":completed_emoji},{"Starts on":starts_on},{"Due on":due_on},{"Assignees":assignees_name}},"style":{"short":false}});
-					view_people_button = {"label":creator_name,"type":"invoke.function","name":"viewpeople","id":id + "|" + current_todo.get("creator").get("id"),"emotion":"positive"};
+					view_people_button = {"label":creator_name,"type":"invoke.function","name":"viewpeople","id":id + "|" + current_task.get("creator").get("id"),"emotion":"positive"};
 					elements.add({"type":"text","text":"Created by " + " [View Profile]($1) " + " on " + created_at,"button_references":{"1":view_people_button}});
 					elements.add(dividerElement);
 					sections.add({"id":1,"elements":elements});
 					i = 0;
 					dataList = list();
-					for each  todo in todos
+					for each  task in tasks
 					{
 						i = i + 1;
 						if(i == 1)
@@ -413,15 +413,15 @@ try
 							// skip current_entry
 							continue;
 						}
-						title = todo.get("title");
+						title = task.get("title");
 						if(title.length() >= 50)
 						{
-							title = todo.subString(0,47) + "..";
+							title = task.subString(0,47) + "..";
 						}
 						description = "";
-						if(todo.get("description") != null)
+						if(task.get("description") != null)
 						{
-							description = todo.get("description");
+							description = task.get("description");
 						}
 						description = description.replaceAll("&lt;","<").replaceAll("&gt;",">").replaceAll("&amp;","&");
 						description = description.replaceAll("<br>","\n");
@@ -436,7 +436,7 @@ try
 						eachData.put("description",description);
 						eachData.put("image_url","https://i.imgur.com/McUuEPk.png");
 						eachData.put("icon_url","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
-						buttonList = {{"label":"Open","type":"invoke.function","name":"viewtodos","id":todo.get("url") + "|" + todos_url + "|1","emotion":"negative"}};
+						buttonList = {{"label":"Open","type":"invoke.function","name":"viewtasks","id":task.get("url") + "|" + tasks_url + "|1","emotion":"negative"}};
 						eachData.put("buttons",buttonList);
 						dataList.add(eachData);
 						if(i == 15)
@@ -447,21 +447,21 @@ try
 					if(dataList.size() != 0)
 					{
 						elements = list();
-						elements.add({"type":"title","text":"Other To-dos"});
+						elements.add({"type":"title","text":"Other Tasks"});
 						elements.add({"type":"cards","data":dataList,"style":{"view":"gallery","size":"small"}});
 						elements.add({"type":"divider"});
 						sections.add({"id":2,"elements":elements});
 					}
-					next_todos = invokeurl
+					next_tasks = invokeurl
 					[
-						url :todos_url + "?page=2"
+						url :tasks_url + "?page=2"
 						type :GET
 						connection:"wrikeconnection"
 					];
-					info next_todos;
-					if(next_todos.size() != 0)
+					info next_tasks;
+					if(next_tasks.size() != 0)
 					{
-						footer = {"text":footer_text,"buttons":{{"label":"Next Page","emotion":"positive","type":"invoke.function","name":"viewtodos","id":"next_page" + "|" + todos_url + "|2"}}};
+						footer = {"text":footer_text,"buttons":{{"label":"Next Page","emotion":"positive","type":"invoke.function","name":"viewtasks","id":"next_page" + "|" + tasks_url + "|2"}}};
 						return {"type":"applet","header":header,"footer":footer,"sections":sections,"tabs":tabsList,"active_tab":id};
 					}
 					else
@@ -470,7 +470,7 @@ try
 						return {"type":"applet","header":header,"sections":sections,"tabs":tabsList,"active_tab":id};
 					}
 				}
-				return {"type":"applet","data_type":"info","tabs":tabsList,"info":{"title":"Your default To-do List is not configured yet!","description":"Click here to configure.","image_url":"https://i.postimg.cc/Wzq58K7J/wrikelogo.png","button":{"label":"Configure Default To-do List","type":"invoke.function","name":"configuretodolistform","emotion":"positive","id":"configuration"}},"active_tab":id};
+				return {"type":"applet","data_type":"info","tabs":tabsList,"info":{"title":"Your default Task List is not configured yet!","description":"Click here to configure.","image_url":"https://i.postimg.cc/Wzq58K7J/wrikelogo.png","button":{"label":"Configure Default Task List","type":"invoke.function","name":"configuretasklistform","emotion":"positive","id":"configuration"}},"active_tab":id};
 			}
 			else if(id == "Schedule")
 			{

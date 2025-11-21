@@ -89,7 +89,7 @@ try
 				values.put("accountid",account_id);
 				values.put("accountname",account_name);
 				values.put("projectid","0");
-				values.put("todolistid","0");
+				values.put("tasklistid","0");
 				db = zoho.cliq.createRecord("wrikedb",values);
 				info db;
 			}
@@ -131,7 +131,7 @@ try
 	query = Map();
 	query.put("criteria","userid=" + user.get("id"));
 	db = zoho.cliq.getRecords("wrikedb",query);
-	if(id == "Create a To-do")
+	if(id == "Create a Task")
 	{
 		record_id = db.get("list").get(0).get("id");
 		account_id = db.get("list").get(0).get("accountid");
@@ -157,27 +157,27 @@ try
 			}
 			dock = project.get("dock");
 			info dock;
-			todosets_url = "";
+			tasksets_url = "";
 			for each  d in dock
 			{
-				if(d.get("name") == "todoset")
+				if(d.get("name") == "taskset")
 				{
-					todosets_url = d.get("url");
+					tasksets_url = d.get("url");
 					break;
 				}
 			}
-			if(todosets_url != "")
+			if(tasksets_url != "")
 			{
-				todosets = invokeurl
+				tasksets = invokeurl
 				[
-					url :todosets_url
+					url :tasksets_url
 					type :GET
 					connection:"wrikeconnection"
 				];
-				info todosets;
-				todolists_url = todosets.get("todolists_url");
+				info tasksets;
+				tasklists_url = tasksets.get("tasklists_url");
 				option = Map();
-				option.put("value",todolists_url.replaceAll("/","-"));
+				option.put("value",tasklists_url.replaceAll("/","-"));
 				option.put("label",project_name);
 				option.put("thumbnail","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 				options.add(option);
@@ -206,11 +206,11 @@ try
 			return response;
 		}
 		inputs = list();
-		inputs.add({"name":"todolists_url","label":"Project name","placeholder":"Choose a Project","trigger_on_change":true,"multiple":false,"mandatory":true,"type":"dynamic_select","options":options});
-		form = {"type":"form","title":"Create a To-do ✅","name":"form","hint":"Note 📝: You need a To-do List to create and proceed with To-dos in the project. Use \"/wrike create a To-do list\" command to set up a To-do list.","version":1,"button_label":"Create","actions":{"submit":{"type":"invoke.function","name":"createtodos"}},"inputs":inputs};
+		inputs.add({"name":"tasklists_url","label":"Project name","placeholder":"Choose a Project","trigger_on_change":true,"multiple":false,"mandatory":true,"type":"dynamic_select","options":options});
+		form = {"type":"form","title":"Create a Task ✅","name":"form","hint":"Note 📝: You need a Task List to create and proceed with Tasks in the project. Use \"/wrike create a Task list\" command to set up a Task list.","version":1,"button_label":"Create","actions":{"submit":{"type":"invoke.function","name":"createtasks"}},"inputs":inputs};
 		return form;
 	}
-	if(id == "View a To-do List")
+	if(id == "View a Task List")
 	{
 		record_id = db.get("list").get(0).get("id");
 		account_id = db.get("list").get(0).get("accountid");
@@ -236,27 +236,27 @@ try
 			}
 			dock = project.get("dock");
 			info dock;
-			todosets_url = "";
+			tasksets_url = "";
 			for each  d in dock
 			{
-				if(d.get("name") == "todoset")
+				if(d.get("name") == "taskset")
 				{
-					todosets_url = d.get("url");
+					tasksets_url = d.get("url");
 					break;
 				}
 			}
-			if(todosets_url != "")
+			if(tasksets_url != "")
 			{
-				todosets = invokeurl
+				tasksets = invokeurl
 				[
-					url :todosets_url
+					url :tasksets_url
 					type :GET
 					connection:"wrikeconnection"
 				];
-				info todosets;
-				todolists_url = todosets.get("todolists_url");
+				info tasksets;
+				tasklists_url = tasksets.get("tasklists_url");
 				option = Map();
-				option.put("value",todolists_url.replaceAll("/","-"));
+				option.put("value",tasklists_url.replaceAll("/","-"));
 				option.put("label",project_name);
 				option.put("thumbnail","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 				options.add(option);
@@ -285,11 +285,11 @@ try
 			return response;
 		}
 		inputs = list();
-		inputs.add({"name":"todolists_url","label":"Project name","placeholder":"Choose a Project","trigger_on_change":true,"multiple":false,"mandatory":true,"type":"dynamic_select","options":options});
-		form = {"type":"form","title":"View a To-do List 📝","name":"form","version":1,"button_label":"View 👁️","actions":{"submit":{"type":"invoke.function","name":"viewtodoswithinlist"}},"inputs":inputs};
+		inputs.add({"name":"tasklists_url","label":"Project name","placeholder":"Choose a Project","trigger_on_change":true,"multiple":false,"mandatory":true,"type":"dynamic_select","options":options});
+		form = {"type":"form","title":"View a Task List 📝","name":"form","version":1,"button_label":"View 👁️","actions":{"submit":{"type":"invoke.function","name":"viewtaskswithinlist"}},"inputs":inputs};
 		return form;
 	}
-	else if(id == "Create a To-do List")
+	else if(id == "Create a Task List")
 	{
 		record_id = db.get("list").get(0).get("id");
 		account_id = db.get("list").get(0).get("accountid");
@@ -315,19 +315,19 @@ try
 			}
 			dock = project.get("dock");
 			info dock;
-			todosets_url = "";
+			tasksets_url = "";
 			for each  d in dock
 			{
-				if(d.get("name") == "todoset")
+				if(d.get("name") == "taskset")
 				{
-					todosets_url = d.get("url");
+					tasksets_url = d.get("url");
 					break;
 				}
 			}
-			if(todosets_url != "")
+			if(tasksets_url != "")
 			{
 				option = Map();
-				option.put("value",todosets_url.replaceAll("/","-"));
+				option.put("value",tasksets_url.replaceAll("/","-"));
 				option.put("label",project_name);
 				option.put("thumbnail","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 				options.add(option);
@@ -356,10 +356,10 @@ try
 			return response;
 		}
 		inputs = list();
-		inputs.add({"name":"todosets_url","label":"Project name","placeholder":"Choose a Project","multiple":false,"mandatory":true,"type":"dynamic_select","options":options});
-		inputs.add({"label":"Name","name":"name","placeholder":"To-do List Name","min_length":"0","max_length":"60","mandatory":true,"type":"text"});
+		inputs.add({"name":"tasksets_url","label":"Project name","placeholder":"Choose a Project","multiple":false,"mandatory":true,"type":"dynamic_select","options":options});
+		inputs.add({"label":"Name","name":"name","placeholder":"Task List Name","min_length":"0","max_length":"60","mandatory":true,"type":"text"});
 		inputs.add({"label":"Description","name":"description","placeholder":"Add extra details","min_length":"0","max_length":"200","mandatory":false,"type":"textarea"});
-		form = {"type":"form","title":"Create a To-do List 📋","name":"form","version":1,"button_label":"Create","actions":{"submit":{"type":"invoke.function","name":"createtodolist"}},"inputs":inputs};
+		form = {"type":"form","title":"Create a Task List 📋","name":"form","version":1,"button_label":"Create","actions":{"submit":{"type":"invoke.function","name":"createtasklist"}},"inputs":inputs};
 		return form;
 	}
 	if(id == "Create a Schedule")

@@ -5,11 +5,11 @@ if(arguments.get("key") != null)
 	// button function 
 	active_tab = arguments.get("key");
 	info active_tab;
-	if(active_tab.startsWith("todos_url"))
+	if(active_tab.startsWith("tasks_url"))
 	{
 		splitIndex = active_tab.indexOf("|");
-		current_todo_url = active_tab.substring(splitIndex + 1,active_tab.length());
-		info current_todo_url;
+		current_task_url = active_tab.substring(splitIndex + 1,active_tab.length());
+		info current_task_url;
 		active_tab = active_tab.substring(0,splitIndex);
 		info active_tab;
 	}
@@ -190,30 +190,30 @@ if(active_tab == "view_document")
 	return {"type":"applet","header":header,"footer":footer,"sections":sections,"active_tab":"Documents"};
 }
 // message button
-if(active_tab == "todos_url")
+if(active_tab == "tasks_url")
 {
-	info "active_tab : todos_url";
-	current_todo = invokeurl
+	info "active_tab : tasks_url";
+	current_task = invokeurl
 	[
-		url :current_todo_url
+		url :current_task_url
 		type :GET
 		connection:"wrikeconnection"
 	];
-	info current_todo;
-	todo_title = current_todo.get("title");
-	if(todo_title.length() >= 50)
+	info current_task;
+	task_title = current_task.get("title");
+	if(task_title.length() >= 50)
 	{
-		todo_title = todo_title.subString(0,47) + "..";
+		task_title = task_title.subString(0,47) + "..";
 	}
-	creator_name = current_todo.get("creator").get("name");
+	creator_name = current_task.get("creator").get("name");
 	if(creator_name.length() >= 20)
 	{
 		creator_name = creator_name.subString(0,18) + "..";
 	}
 	description = "";
-	if(current_todo.get("description") != null)
+	if(current_task.get("description") != null)
 	{
-		description = current_todo.get("description");
+		description = current_task.get("description");
 	}
 	description = description.replaceAll("&lt;","<").replaceAll("&gt;",">").replaceAll("&amp;","&");
 	description = description.replaceAll("<br>","\n");
@@ -223,31 +223,31 @@ if(active_tab == "todos_url")
 	{
 		description = description.subString(0,98) + "..";
 	}
-	starts_on = current_todo.get("starts_on");
+	starts_on = current_task.get("starts_on");
 	if(starts_on == null)
 	{
 		starts_on = "-";
 	}
 	starts_on = starts_on.replaceAll("T"," ").subString(0,starts_on.lastIndexOf(":"));
-	due_on = current_todo.get("due_on");
+	due_on = current_task.get("due_on");
 	if(due_on == null)
 	{
 		due_on = "-";
 	}
 	due_on = due_on.replaceAll("T"," ").subString(0,due_on.lastIndexOf(":"));
-	created_at = current_todo.get("created_at");
+	created_at = current_task.get("created_at");
 	if(created_at == null)
 	{
 		created_at = "-";
 	}
 	created_at = created_at.replaceAll("T"," ").subString(0,created_at.lastIndexOf(":"));
 	completed_emoji = "✖️";
-	if(current_todo.get("completed") == true)
+	if(current_task.get("completed") == true)
 	{
 		completed_emoji = "✔️";
 	}
 	assignees_name = "";
-	assignees = current_todo.get("assignees");
+	assignees = current_task.get("assignees");
 	info assignees;
 	for each  assignee in assignees
 	{
@@ -273,7 +273,7 @@ if(active_tab == "todos_url")
 	slidesList = list();
 	slidesList00 = Map();
 	slidesList00.put("type","text");
-	//slidesList00.put("title",todo_title);
+	//slidesList00.put("title",task_title);
 	slidesList00.put("data","Description: " + description);
 	slidesList.add(slidesList00);
 	slidesList0 = Map();
@@ -288,14 +288,14 @@ if(active_tab == "todos_url")
 	query.put("criteria","userid=" + user.get("id"));
 	db = zoho.cliq.getRecords("wrikedb",query);
 	account_id = db.get("list").get(0).get("accountid");
-	project_url = "https://www.wrike.com/open.htm?id=" + current_todo.get("folder").get("id");
+	project_url = "https://www.wrike.com/open.htm?id=" + current_task.get("folder").get("id");
 	rowsList0 = Map();
 	rowsList0.put("Name","Project");
-	rowsList0.put("Details","[" + current_todo.get("folder").get("name") + "](" + project_url + ")");
+	rowsList0.put("Details","[" + current_task.get("folder").get("name") + "](" + project_url + ")");
 	rowsList.add(rowsList0);
 	rowsList1 = Map();
-	rowsList1.put("Name","To-do List");
-	rowsList1.put("Details","[" + current_todo.get("parent").get("title") + "](" + current_todo.get("parent").get("app_url") + ")");
+	rowsList1.put("Name","Task List");
+	rowsList1.put("Details","[" + current_task.get("parent").get("title") + "](" + current_task.get("parent").get("app_url") + ")");
 	rowsList.add(rowsList1);
 	rowsList2 = Map();
 	rowsList2.put("Name","Completed");
@@ -322,19 +322,19 @@ if(active_tab == "todos_url")
 	//button
 	buttonsList = list();
 	buttonsList0 = Map();
-	buttonsList0.put("label","View To-do");
+	buttonsList0.put("label","View Task");
 	buttonsList0.put("type","+");
 	action = Map();
 	action.put("type","open.url");
 	data = Map();
-	data.put("web",current_todo.get("app_url"));
+	data.put("web",current_task.get("app_url"));
 	action.put("data",data);
 	buttonsList0.put("action",action);
 	buttonsList.add(buttonsList0);
 	slidesList0.put("buttons",buttonsList);
 	slidesList.add(slidesList0);
 	response.put("slides",slidesList);
-	response.put("text","### " + todo_title);
+	response.put("text","### " + task_title);
 	response.put("navigation","true");
 	return response;
 }
@@ -347,7 +347,7 @@ if(active_tab == "help_next_page_1")
 	slidesList = list();
 	slidesList0 = Map();
 	slidesList0.put("type","text");
-	slidesList0.put("data","### To-Do List:\n*Create:*\n```/wrike Create a To-do List```\n*Visualize:* \n```/wrike View a To-do List```\n🟡 Use Wrike widgets to get all To-dos within the configured To-do list.\n---\n### To-Dos:\n*Create:*\n```/wrike Create a To-do```\n🟡 Use the __Message Card__ to create a To-do by clicking any message from Cliq, then clicking more, and selecting `Create a To-do` to create a To-do from the selected message content.\n\n*Visualize:* \n\n🟡 Use Wrike widgets to get all To-dos information, comments, etc.\n---\n### Schedule: \n*Create:*\n```/wrike Create a schedule```\n*Visualize:* \n🟡 Use Wrike widgets to get all schedule information, comments, etc.\n");
+	slidesList0.put("data","### Task List:\n*Create:*\n```/wrike Create a Task List```\n*Visualize:* \n```/wrike View a Task List```\n🟡 Use Wrike widgets to get all Tasks within the configured Task list.\n---\n### Tasks:\n*Create:*\n```/wrike Create a Task```\n🟡 Use the __Message Card__ to create a Task by clicking any message from Cliq, then clicking more, and selecting `Create a Task` to create a Task from the selected message content.\n\n*Visualize:* \n\n🟡 Use Wrike widgets to get all Tasks information, comments, etc.\n---\n### Schedule: \n*Create:*\n```/wrike Create a schedule```\n*Visualize:* \n🟡 Use Wrike widgets to get all schedule information, comments, etc.\n");
 	buttonsList = list();
 	buttonsList0 = Map();
 	buttonsList0.put("label","Next Page ➡️");

@@ -12,54 +12,54 @@ project = invokeurl
 ];
 dock = project.get("dock");
 info dock;
-todosets_url = "";
+tasksets_url = "";
 for each  d in dock
 {
-	if(d.get("name") == "todoset")
+	if(d.get("name") == "taskset")
 	{
-		todosets_url = d.get("url");
+		tasksets_url = d.get("url");
 		break;
 	}
 }
-todosets = invokeurl
+tasksets = invokeurl
 [
-	url :todosets_url
+	url :tasksets_url
 	type :GET
 	connection:"wrikeconnection"
 ];
-info todosets;
-todolists_url = todosets.get("todolists_url");
-todolists = invokeurl
+info tasksets;
+tasklists_url = tasksets.get("tasklists_url");
+tasklists = invokeurl
 [
-	url :todolists_url
+	url :tasklists_url
 	type :GET
 	connection:"wrikeconnection"
 ];
-info todolists;
+info tasklists;
 options = List();
-for each  todolist in todolists
+for each  tasklist in tasklists
 {
-	name = todolist.get("name");
+	name = tasklist.get("name");
 	if(name.length() >= 50)
 	{
 		name = name.subString(0,47) + "..";
 	}
-	todolist_id = todolist.get("id");
-	option = {"label":name,"value":todolist_id};
+	tasklist_id = tasklist.get("id");
+	option = {"label":name,"value":tasklist_id};
 	options.add(option);
 }
 if(options.size() == 0)
 {
 	// no projects in account
 	elements = list();
-	elements.add({"type":"activity","title":"You don't have any To-do List yet! 🤔","description":"Use `/wrike Create a To-do List` in any Cliq chat to create your first To-do List and start organizing your day! 📅💪","image_url":"https://i.postimg.cc/Wzq58K7J/wrikelogo.png"});
+	elements.add({"type":"activity","title":"You don't have any Task List yet! 🤔","description":"Use `/wrike Create a Task List` in any Cliq chat to create your first Task List and start organizing your day! 📅💪","image_url":"https://i.postimg.cc/Wzq58K7J/wrikelogo.png"});
 	sections = list();
 	sections.add({"id":1,"elements":elements});
-	header = {"title":"To-dos"};
-	return {"type":"applet","header":header,"sections":sections,"active_tab":"To-dos"};
+	header = {"title":"Tasks"};
+	return {"type":"applet","header":header,"sections":sections,"active_tab":"Tasks"};
 }
 inputs = list();
-inputs.add({"type":"dynamic_select","name":"todolist_id","label":"To-do List","placeholder":"Choose a To-do List","mandatory":true,"options":options});
+inputs.add({"type":"dynamic_select","name":"tasklist_id","label":"Task List","placeholder":"Choose a Task List","mandatory":true,"options":options});
 inputs.add({"name":"type","value":"configure","type":"hidden"});
-form = {"type":"form","title":"Configure To-do List","name":"form","version":1,"button_label":"Configure","actions":{"submit":{"type":"invoke.function","name":"createtodos"}},"inputs":inputs};
+form = {"type":"form","title":"Configure Task List","name":"form","version":1,"button_label":"Configure","actions":{"submit":{"type":"invoke.function","name":"createtasks"}},"inputs":inputs};
 return form;
