@@ -3,17 +3,47 @@ try
 {
 response = invokeurl
 [
-	url :"https://www.wrike.com/api/v4/accounts"
+	url :"https://www.wrike.com/api/v4/contacts?me=true"
 	type :GET
 	connection:"wrikeconnection"
 ];
 info response;
-accounts = response.get("data");
-if(accounts == null)
+contacts = response.get("data");
+if(contacts == null)
 {
-	accounts = list();
+	contacts = list();
 }
-info accounts;
+accounts = list();
+account_ids = list();
+for each  contact in contacts
+{
+	name_candidate = contact.get("companyName");
+	if(name_candidate == null || name_candidate == "")
+	{
+		name_candidate = (ifnull(contact.get("firstName"),"") + " " + ifnull(contact.get("lastName"),"")).trim();
+	}
+	if(name_candidate == "")
+	{
+		name_candidate = "Wrike Workspace";
+	}
+	profiles = contact.get("profiles");
+	if(profiles == null)
+	{
+		profiles = list();
+	}
+	for each  profile in profiles
+	{
+		acc_id = profile.get("accountId");
+		if(acc_id != null && acc_id != "" && account_ids.contains(acc_id) == false)
+		{
+			account_map = Map();
+			account_map.put("id",acc_id);
+			account_map.put("name",name_candidate);
+			accounts.add(account_map);
+			account_ids.add(acc_id);
+		}
+	}
+}
 	query = Map();
 	query.put("criteria","userid=" + user.get("id"));
 	db = zoho.cliq.getRecords("wrikedb",query);
@@ -58,6 +88,8 @@ info accounts;
 				values.put("userid",user.get("id"));
 				values.put("accountid",account_id);
 				values.put("accountname",account_name);
+				values.put("projectid","0");
+				values.put("todolistid","0");
 				db = zoho.cliq.createRecord("wrikedb",values);
 				info db;
 			}

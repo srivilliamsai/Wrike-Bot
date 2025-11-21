@@ -27,7 +27,7 @@ if(type == "configure")
 			button.add(editDefaultProject);
 			button.add({"label":"Edit Default To-do List","type":"invoke.function","name":"configuretodolistform","emotion":"positive","id":"configuration"});
 			header = {"title":"To-dos (page 1)","navigation":"new","buttons":button};
-			todos_url = "https://www.wrike.com/api/v4/" + account_id + "/folders/" + project_id + "/folders/" + todolist_id + "/tasks";
+			todos_url = "https://www.wrike.com/api/v4/folders/" + todolist_id + "/tasks";
 			todos = invokeurl
 			[
 				url :todos_url

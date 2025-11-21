@@ -39,7 +39,7 @@ headers = Map();
 headers.put("Content-Type","application/json");
 webhook = invokeurl
 [
-	url :"https://www.wrike.com/api/v4/" + account_id + "/folders/" + project_id + "/webhooks"
+	url :"https://www.wrike.com/api/v4/folders/" + project_id + "/webhooks"
 	type :POST
 	parameters:toString(parameters)
 	headers:headers

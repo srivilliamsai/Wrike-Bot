@@ -28,7 +28,7 @@ else
 }
 projects = invokeurl
 [
-	url :"https://www.wrike.com/api/v4/" + account_id + "/folders"
+	url :"https://www.wrike.com/api/v4/folders?spaceId=" + account_id
 	type :GET
 	connection:"wrikeconnection"
 ];

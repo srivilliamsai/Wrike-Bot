@@ -6,7 +6,7 @@ record_id = db.get("list").get(0).get("id");
 account_id = db.get("list").get(0).get("accountid");
 projects = invokeurl
 [
-	url :"https://www.wrike.com/api/v4/" + account_id + "/folders"
+	url :"https://www.wrike.com/api/v4/folders?spaceId=" + account_id
 	type :GET
 	connection:"wrikeconnection"
 ];

@@ -10,24 +10,55 @@ try
 		{
 			response = invokeurl
 			[
-				url :"https://www.wrike.com/api/v4/accounts"
+				url :"https://www.wrike.com/api/v4/contacts?me=true"
 				type :GET
 				connection:"wrikeconnection"
 			];
 			info response;
-			accounts = response.get("data");
-			if(accounts == null)
+			contacts = response.get("data");
+			if(contacts == null)
 			{
-				accounts = list();
+				contacts = list();
 			}
-			info accounts;
+			info contacts;
 			account_id = "";
 			account_name = "";
-			for each  account in accounts
+			for each  contact in contacts
 			{
-				account_id = account.get("id");
-				account_name = account.get("name");
-				break;
+				profiles = contact.get("profiles");
+				if(profiles == null)
+				{
+					profiles = list();
+				}
+				for each  profile in profiles
+				{
+					if(profile.get("accountId") != null && profile.get("accountId") != "")
+					{
+						account_id = profile.get("accountId");
+						break;
+					}
+				}
+				if(account_name == "" && contact.get("companyName") != null)
+				{
+					account_name = contact.get("companyName");
+				}
+				if(account_id != "" && account_name != "")
+				{
+					break;
+				}
+			}
+			if(account_name == "" && contacts.size() > 0)
+			{
+				default_contact = contacts.get(0);
+				full_name = (ifnull(default_contact.get("firstName"),"") + " " + ifnull(default_contact.get("lastName"),"")).trim();
+				if(full_name != "")
+				{
+					account_name = full_name;
+				}
+			}
+			if(account_name == "")
+			{
+				account_name = "Wrike Workspace";
 			}
 			if(account_id == "" || account_name == "")
 			{
@@ -57,6 +88,8 @@ try
 				values.put("userid",user.get("id"));
 				values.put("accountid",account_id);
 				values.put("accountname",account_name);
+				values.put("projectid","0");
+				values.put("todolistid","0");
 				db = zoho.cliq.createRecord("wrikedb",values);
 				info db;
 			}
@@ -78,18 +111,22 @@ try
 	query = Map();
 	query.put("criteria","userid=" + user.get("id"));
 	db = zoho.cliq.getRecords("wrikedb",query);
-	// to-do
 	record_id = db.get("list").get(0).get("id");
 	account_id = db.get("list").get(0).get("accountid");
-	response = invokeurl
-	[
-		url :"https://www.wrike.com/api/v4/" + account_id + "/folders"
-		type :GET
-		connection:"wrikeconnection"
-	];
-	info response;
-	options = List();
-	for each  project in response
+response = invokeurl
+[
+	url :"https://www.wrike.com/api/v4/folders?spaceId=" + account_id
+	type :GET
+	connection:"wrikeconnection"
+];
+info response;
+projects = response.get("data");
+if(projects == null)
+{
+	projects = list();
+}
+options = List();
+for each  project in projects
 	{
 		project_name = project.get("name");
 		if(project_name.length() >= 50)
@@ -109,16 +146,8 @@ try
 		}
 		if(todosets_url != "")
 		{
-			todosets = invokeurl
-			[
-				url :todosets_url
-				type :GET
-				connection:"wrikeconnection"
-			];
-			info todosets;
-			todolists_url = todosets.get("todolists_url");
 			option = Map();
-			option.put("value",todolists_url.replaceAll("/","-"));
+			option.put("value",todosets_url.replaceAll("/","-"));
 			option.put("label",project_name);
 			option.put("thumbnail","https://i.postimg.cc/Wzq58K7J/wrikelogo.png");
 			options.add(option);
@@ -147,10 +176,10 @@ try
 		return response;
 	}
 	inputs = list();
-	inputs.add({"name":"todolists_url","label":"Project name","placeholder":"Choose a Project","trigger_on_change":true,"multiple":false,"mandatory":true,"type":"dynamic_select","options":options});
-	inputs.add({"name":"is_message_action","value":"true","type":"hidden"});
-	inputs.add({"label":"Description","name":"description","value":message.get("text"),"placeholder":"Add extra details","min_length":"0","max_length":"100","mandatory":false,"type":"textarea"});
-	form = {"type":"form","title":"Create a To-do ✅","name":"form","hint":"Note 📝: You need a To-do List to create and proceed with To-dos in the project. Use \"/wrike create a To-do list\" command to set up a To-do list.","version":1,"button_label":"Create","actions":{"submit":{"type":"invoke.function","name":"createtodos"}},"inputs":inputs};
+	inputs.add({"name":"todosets_url","label":"Project name","placeholder":"Choose a Project","multiple":false,"mandatory":true,"type":"dynamic_select","options":options});
+	inputs.add({"label":"Name","name":"name","placeholder":"To-do List Name","min_length":"0","max_length":"60","mandatory":true,"type":"text"});
+	inputs.add({"label":"Description","name":"description","placeholder":"Add extra details","min_length":"0","max_length":"200","mandatory":false,"type":"textarea"});
+	form = {"type":"form","title":"Create a To-do List 📋","name":"form","version":1,"button_label":"Create","actions":{"submit":{"type":"invoke.function","name":"createtodolist"}},"inputs":inputs};
 	return form;
 }
 catch (e)

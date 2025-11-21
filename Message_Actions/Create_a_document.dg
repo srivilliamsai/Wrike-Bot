@@ -10,24 +10,55 @@ try
 		{
 			response = invokeurl
 			[
-				url :"https://www.wrike.com/api/v4/accounts"
+				url :"https://www.wrike.com/api/v4/contacts?me=true"
 				type :GET
 				connection:"wrikeconnection"
 			];
 			info response;
-			accounts = response.get("data");
-			if(accounts == null)
+			contacts = response.get("data");
+			if(contacts == null)
 			{
-				accounts = list();
+				contacts = list();
 			}
-			info accounts;
+			info contacts;
 			account_id = "";
 			account_name = "";
-			for each  account in accounts
+			for each  contact in contacts
 			{
-				account_id = account.get("id");
-				account_name = account.get("name");
-				break;
+				profiles = contact.get("profiles");
+				if(profiles == null)
+				{
+					profiles = list();
+				}
+				for each  profile in profiles
+				{
+					if(profile.get("accountId") != null && profile.get("accountId") != "")
+					{
+						account_id = profile.get("accountId");
+						break;
+					}
+				}
+				if(account_name == "" && contact.get("companyName") != null)
+				{
+					account_name = contact.get("companyName");
+				}
+				if(account_id != "" && account_name != "")
+				{
+					break;
+				}
+			}
+			if(account_name == "" && contacts.size() > 0)
+			{
+				default_contact = contacts.get(0);
+				full_name = (ifnull(default_contact.get("firstName"),"") + " " + ifnull(default_contact.get("lastName"),"")).trim();
+				if(full_name != "")
+				{
+					account_name = full_name;
+				}
+			}
+			if(account_name == "")
+			{
+				account_name = "Wrike Workspace";
 			}
 			if(account_id == "" || account_name == "")
 			{
@@ -57,6 +88,8 @@ try
 				values.put("userid",user.get("id"));
 				values.put("accountid",account_id);
 				values.put("accountname",account_name);
+				values.put("projectid","0");
+				values.put("todolistid","0");
 				db = zoho.cliq.createRecord("wrikedb",values);
 				info db;
 			}
@@ -82,7 +115,7 @@ try
 	account_id = db.get("list").get(0).get("accountid");
 	projects = invokeurl
 	[
-		url :"https://www.wrike.com/api/v4/" + account_id + "/folders"
+		url :"https://www.wrike.com/api/v4/folders?spaceId=" + account_id
 		type :GET
 		connection:"wrikeconnection"
 	];

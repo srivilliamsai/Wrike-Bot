@@ -2,7 +2,7 @@
 try 
 {
 	query = Map();
-	query.put("criteria","userid=" + user.get("id"));
+	query.put("criteria","userid==\"" + user.get("id") + "\"");
 	db = zoho.cliq.getRecords("wrikedb",query);
 	if(db.get("status") == "SUCCESS")
 	{
@@ -10,24 +10,55 @@ try
 		{
 			response = invokeurl
 			[
-				url :"https://www.wrike.com/api/v4/accounts"
+				url :"https://www.wrike.com/api/v4/contacts?me=true"
 				type :GET
 				connection:"wrikeconnection"
 			];
 			info response;
-			accounts = response.get("data");
-			if(accounts == null)
+			contacts = response.get("data");
+			if(contacts == null)
 			{
-				accounts = list();
+				contacts = list();
 			}
-			info accounts;
+			info contacts;
 			account_id = "";
 			account_name = "";
-			for each  account in accounts
+			for each  contact in contacts
 			{
-				account_id = account.get("id");
-				account_name = account.get("name");
-				break;
+				profiles = contact.get("profiles");
+				if(profiles == null)
+				{
+					profiles = list();
+				}
+				for each  profile in profiles
+				{
+					if(profile.get("accountId") != null && profile.get("accountId") != "")
+					{
+						account_id = profile.get("accountId");
+						break;
+					}
+				}
+				if(account_name == "" && contact.get("companyName") != null)
+				{
+					account_name = contact.get("companyName");
+				}
+				if(account_id != "" && account_name != "")
+				{
+					break;
+				}
+			}
+			if(account_name == "" && contacts.size() > 0)
+			{
+				default_contact = contacts.get(0);
+				full_name = (ifnull(default_contact.get("firstName"),"") + " " + ifnull(default_contact.get("lastName"),"")).trim();
+				if(full_name != "")
+				{
+					account_name = full_name;
+				}
+			}
+			if(account_name == "")
+			{
+				account_name = "Wrike Workspace";
 			}
 			if(account_id == "" || account_name == "")
 			{
@@ -57,6 +88,8 @@ try
 				values.put("userid",user.get("id"));
 				values.put("accountid",account_id);
 				values.put("accountname",account_name);
+				values.put("projectid","0");
+				values.put("todolistid","0");
 				db = zoho.cliq.createRecord("wrikedb",values);
 				info db;
 			}
@@ -76,26 +109,70 @@ try
 		return response;
 	}
 	query = Map();
-	query.put("criteria","userid=" + user.get("id"));
+	query.put("criteria","userid==\"" + user.get("id") + "\"");
 	db = zoho.cliq.getRecords("wrikedb",query);
 	record_id = db.get("list").get(0).get("id");
 	account_id = db.get("list").get(0).get("accountid");
-	response = invokeurl
+projects = list();
+try 
+{
+	spaces_response = invokeurl
 	[
-		url :"https://www.wrike.com/api/v4/" + account_id + "/folders"
+		url :"https://www.wrike.com/api/v4/spaces?withArchived=false"
 		type :GET
 		connection:"wrikeconnection"
 	];
-	info response;
-	options = List();
-	for each  project in response
+	spaces = spaces_response.get("data");
+	if(spaces == null)
 	{
-		project_name = project.get("name");
-		if(project_name.length() >= 50)
+		spaces = list();
+	}
+	for each  space in spaces
+	{
+		space_id = space.get("id");
+		if(space_id == null || space_id == "")
+		{
+			continue;
+		}
+		folders_response = invokeurl
+		[
+			url :"https://www.wrike.com/api/v4/spaces/" + space_id + "/folders"
+			type :GET
+			connection:"wrikeconnection"
+		];
+		folders = folders_response.get("data");
+		if(folders == null)
+		{
+			folders = list();
+		}
+		for each  folder in folders
+		{
+			folder.put("spaceId",space_id);
+			projects.add(folder);
+		}
+	}
+}
+catch (space_error)
+{
+	info space_error;
+}
+options = List();
+for each  project in projects
+	{
+		project_name = ifnull(project.get("title"),project.get("name"));
+		if(project_name == null)
+		{
+			project_name = "";
+		}
+		if(project_name != "" && project_name.length() >= 50)
 		{
 			project_name = project_name.subString(0,47) + "..";
 		}
 		dock = project.get("dock");
+		if(dock == null)
+		{
+			dock = list();
+		}
 		info dock;
 		schedule_url = "";
 		for each  d in dock

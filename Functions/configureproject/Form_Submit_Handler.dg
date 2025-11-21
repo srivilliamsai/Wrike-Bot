@@ -26,7 +26,7 @@ if(db.get("status").equalsIgnoreCase("SUCCESS"))
 	tabsList = {{"label":"Project","id":"Project"},{"label":"To-dos","id":"To-dos"},{"label":"Schedule","id":"Schedule"},{"label":"Files","id":"Files"},{"label":"Documents","id":"Documents"}};
 	project = invokeurl
 	[
-		url :"https://www.wrike.com/api/v4/" + account_id + "/folders/" + project_id + ""
+		url :"https://www.wrike.com/api/v4/folders/" + project_id + ""
 		type :GET
 		connection:"wrikeconnection"
 	];

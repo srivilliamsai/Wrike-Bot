@@ -6,6 +6,18 @@
    
 ![Wrike-for-Zoho-Cliq](/images/installation-page.png)
 
+### OAuth 2.0 configuration
+
+| Setting | Value |
+| --- | --- |
+| Authorization URL | `https://login.wrike.com/oauth2/authorize/v4` |
+| Access Token URL | `https://login.wrike.com/oauth2/token` |
+| Refresh Token URL | `https://login.wrike.com/oauth2/token` |
+| Required Scopes | `Default wsReadWrite` |
+| Token Transport | Header (handled automatically when using the Cliq connection) |
+
+Configure a Cliq custom service named `wrikeconnection` with the values above and copy Cliq's generated redirect URL into Wrike's developer portal. Every Deluge script now references this service so the tokens are shared across bots, functions, schedulers, and widgets.
+
 ## Database Structure
 
 The extension stores minimal configuration in three Zoho Cliq databases. Create the tables below (or update existing ones) so the scripts can read/write user preferences.

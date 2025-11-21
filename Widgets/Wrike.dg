@@ -7,29 +7,67 @@ try
 	// confiure default account
 	if(db.get("list").size() == 0)
 	{
-		response = invokeurl
-		[
-			url :"https://www.wrike.com/api/v4/accounts"
-			type :GET
-			connection:"wrikeconnection"
-		];
-		accounts = response.get("data");
-		if(accounts == null)
+	response = invokeurl
+	[
+		url :"https://www.wrike.com/api/v4/contacts?me=true"
+		type :GET
+		connection:"wrikeconnection"
+	];
+	contacts = response.get("data");
+	if(contacts == null)
+	{
+		contacts = list();
+	}
+	account_id = "";
+	account_name = "";
+	for each  contact in contacts
+	{
+		profiles = contact.get("profiles");
+		if(profiles == null)
 		{
-			accounts = list();
+			profiles = list();
 		}
-		for each  account in accounts
+		for each  profile in profiles
 		{
-			account_id = account.get("id");
-			account_name = account.get("name");
-			values = Map();
-			values.put("userid",user.get("id"));
-			values.put("accountid",account_id);
-			values.put("accountname",account_name);
-			db = zoho.cliq.createRecord("wrikedb",values);
-			info db;
+			if(profile.get("accountId") != null && profile.get("accountId") != "")
+			{
+				account_id = profile.get("accountId");
+				break;
+			}
+		}
+		if(account_name == "" && contact.get("companyName") != null)
+		{
+			account_name = contact.get("companyName");
+		}
+		if(account_id != "" && account_name != "")
+		{
 			break;
 		}
+	}
+	if(account_name == "" && contacts.size() > 0)
+	{
+		default_contact = contacts.get(0);
+		full_name = (ifnull(default_contact.get("firstName"),"") + " " + ifnull(default_contact.get("lastName"),"")).trim();
+		if(full_name != "")
+		{
+			account_name = full_name;
+		}
+	}
+	if(account_name == "")
+	{
+		account_name = "Wrike Workspace";
+	}
+	if(account_id != "")
+	{
+		values = Map();
+		values.put("userid",user.get("id"));
+		values.put("accountid",account_id);
+		values.put("accountname",account_name);
+				values.put("projectid","0");
+				values.put("todolistid","0");
+		db = zoho.cliq.createRecord("wrikedb",values);
+		info db;
+	}
 	}
 	// confiure default project
 	db = zoho.cliq.getRecords("wrikedb",query);
@@ -39,7 +77,7 @@ try
 		account_id = db.get("list").get(0).get("accountid");
 		projects = invokeurl
 		[
-			url :"https://www.wrike.com/api/v4/accounts/" + account_id + "/folders"
+			url :"https://www.wrike.com/api/v4/folders?spaceId=" + account_id
 			type :GET
 			connection:"wrikeconnection"
 		];
@@ -67,7 +105,7 @@ try
 		project_id = db.get("list").get(0).get("projectid");
 		project = invokeurl
 		[
-			url :"https://www.wrike.com/api/v4/" + account_id + "/folders/" + project_id + ""
+			url :"https://www.wrike.com/api/v4/folders/" + project_id + ""
 			type :GET
 			connection:"wrikeconnection"
 		];
@@ -138,7 +176,7 @@ try
 				// project tab 1
 				project = invokeurl
 				[
-					url :"https://www.wrike.com/api/v4/" + account_id + "/folders/" + project_id + ""
+					url :"https://www.wrike.com/api/v4/folders/" + project_id + ""
 					type :GET
 					connection:"wrikeconnection"
 				];
@@ -278,7 +316,7 @@ try
 					button.add(editDefaultProject);
 					button.add({"label":"Edit Default To-do List","type":"invoke.function","name":"configuretodolistform","emotion":"positive","id":"configuration"});
 					header = {"title":"To-dos (page 1)","navigation":"new","buttons":button};
-					todos_url = "https://www.wrike.com/api/v4/" + account_id + "/folders/" + project_id + "/folders/" + todolist_id + "/tasks";
+					todos_url = "https://www.wrike.com/api/v4/folders/" + todolist_id + "/tasks";
 					todos = invokeurl
 					[
 						url :todos_url
@@ -443,7 +481,7 @@ try
 				file_image_url = "https://i.imgur.com/2VA4szx.png";
 				project = invokeurl
 				[
-					url :"https://www.wrike.com/api/v4/" + account_id + "/folders/" + project_id + ""
+					url :"https://www.wrike.com/api/v4/folders/" + project_id + ""
 					type :GET
 					connection:"wrikeconnection"
 				];
@@ -634,7 +672,7 @@ try
 				file_image_url = "https://i.imgur.com/2VA4szx.png";
 				project = invokeurl
 				[
-					url :"https://www.wrike.com/api/v4/" + account_id + "/folders/" + project_id + ""
+					url :"https://www.wrike.com/api/v4/folders/" + project_id + ""
 					type :GET
 					connection:"wrikeconnection"
 				];
@@ -743,7 +781,7 @@ try
 				doc_image_url = "https://i.imgur.com/2VA4szx.png";
 				project = invokeurl
 				[
-					url :"https://www.wrike.com/api/v4/" + account_id + "/folders/" + project_id + ""
+					url :"https://www.wrike.com/api/v4/folders/" + project_id + ""
 					type :GET
 					connection:"wrikeconnection"
 				];

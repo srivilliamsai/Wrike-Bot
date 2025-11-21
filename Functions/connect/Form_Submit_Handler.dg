@@ -11,6 +11,8 @@ record_id = db_exist.get("list").get(0).get("id");
 values = Map();
 values.put("accountid",account_id);
 values.put("accountname",account_name);
+				values.put("projectid","0");
+				values.put("todolistid","0");
 values.put("projectid",0);
 values.put("todolistid",0);
 db = zoho.cliq.updateRecord("wrikedb",record_id,values);

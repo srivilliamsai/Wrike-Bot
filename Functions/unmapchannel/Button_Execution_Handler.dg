@@ -28,7 +28,7 @@ if(get_delete_db.get("list").size() > 0)
 	info delete_db;
 	webhook = invokeurl
 	[
-		url :"https://www.wrike.com/api/v4/" + account_id + "/folders/" + project_id + "/webhooks/" + webhook_id + ""
+		url :"https://www.wrike.com/api/v4/webhooks/" + webhook_id + ""
 		type :DELETE
 		connection:"wrikeconnection"
 	];
